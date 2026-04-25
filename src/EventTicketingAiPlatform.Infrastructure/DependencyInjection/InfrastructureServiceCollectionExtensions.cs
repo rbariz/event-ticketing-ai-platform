@@ -3,6 +3,9 @@ using EventTicketingAiPlatform.Application.Options;
 using EventTicketingAiPlatform.Application.Risk;
 using EventTicketingAiPlatform.Infrastructure.AI;
 using EventTicketingAiPlatform.Infrastructure.InMemory;
+using EventTicketingAiPlatform.Infrastructure.Persistence;
+using EventTicketingAiPlatform.Infrastructure.Persistence.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -16,10 +19,11 @@ namespace EventTicketingAiPlatform.Infrastructure.DependencyInjection
 {
     public static class InfrastructureServiceCollectionExtensions
     {
-        public static IServiceCollection AddInMemoryInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInMemoryInfrastructure(
+            this IServiceCollection services,
+            IConfiguration configuration)
         {
-            
-            services.AddSingleton<InMemoryStore>(sp =>
+            services.AddSingleton(sp =>
             {
                 var store = new InMemoryStore();
                 InMemorySeed.Seed(store);
@@ -30,8 +34,34 @@ namespace EventTicketingAiPlatform.Infrastructure.DependencyInjection
             services.AddScoped<IScanAttemptRepository, InMemoryScanAttemptRepository>();
             services.AddScoped<IUnitOfWork, InMemoryUnitOfWork>();
 
+            services.AddRiskExplanation(configuration);
+
+            return services;
+        }
+
+        public static IServiceCollection AddPostgresInfrastructure(
+            this IServiceCollection services,
+            IConfiguration configuration,
+            string connectionString)
+        {
+            services.AddDbContext<EventTicketingDbContext>(options =>
+                options.UseNpgsql(connectionString));
+
+            services.AddScoped<ITicketRepository, PgTicketRepository>();
+            services.AddScoped<IScanAttemptRepository, PgScanAttemptRepository>();
+            services.AddScoped<IUnitOfWork, PgUnitOfWork>();
+
+            services.AddRiskExplanation(configuration);
+
+            return services;
+        }
+
+        private static IServiceCollection AddRiskExplanation(
+            this IServiceCollection services,
+            IConfiguration configuration)
+        {
             services.Configure<OpenAiOptions>(
-    configuration.GetSection("OpenAI"));
+                configuration.GetSection("OpenAI"));
 
             services.AddHttpClient<OpenAiRiskExplanationService>();
 

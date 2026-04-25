@@ -1,6 +1,9 @@
 using EventTicketingAiPlatform.Api.Middleware;
 using EventTicketingAiPlatform.Application.DependencyInjection;
 using EventTicketingAiPlatform.Infrastructure.DependencyInjection;
+using EventTicketingAiPlatform.Infrastructure.Persistence;
+using EventTicketingAiPlatform.Infrastructure.Persistence.Seeding;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,9 +12,25 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddApplication();
-builder.Services.AddInMemoryInfrastructure(builder.Configuration);
+//builder.Services.AddInMemoryInfrastructure(builder.Configuration);
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("DefaultConnection is not configured.");
+
+builder.Services.AddPostgresInfrastructure(
+    builder.Configuration,
+    connectionString);
 
 var app = builder.Build();
+
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<EventTicketingDbContext>();
+
+    await db.Database.MigrateAsync();
+    await PostgreSqlSeed.SeedAsync(db);
+}
 
 if (app.Environment.IsDevelopment())
 {
