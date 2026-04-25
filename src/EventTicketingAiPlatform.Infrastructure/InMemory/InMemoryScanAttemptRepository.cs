@@ -41,5 +41,15 @@ namespace EventTicketingAiPlatform.Infrastructure.InMemory
                     .OrderByDescending(x => x.ScannedAtUtc)
                     .ToList());
         }
+
+        public Task<ScanAttempt?> GetByIdAsync(
+    Guid id,
+    CancellationToken cancellationToken = default)
+        {
+            var result = _store.ScanAttempts
+                .FirstOrDefault(x => x.Id == id);
+
+            return Task.FromResult(result);
+        }
     }
 }

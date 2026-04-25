@@ -22,7 +22,7 @@ namespace EventTicketingAiPlatform.Infrastructure.InMemory
                 TicketCode = "TCK-VALID-001",
                 Status = TicketStatus.Active,
                 ValidFromUtc = now.AddHours(-1),
-                ValidUntilUtc = now.AddHours(4)
+                ValidUntilUtc = now.AddHours(30)
             },
             new Ticket
             {

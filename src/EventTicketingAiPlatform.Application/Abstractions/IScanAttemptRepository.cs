@@ -15,5 +15,9 @@ namespace EventTicketingAiPlatform.Application.Abstractions
             string ticketCode,
             DateTime sinceUtc,
             CancellationToken cancellationToken = default);
+
+        Task<ScanAttempt?> GetByIdAsync(
+    Guid id,
+    CancellationToken cancellationToken = default);
     }
 }

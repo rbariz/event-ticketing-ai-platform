@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EventTicketingAiPlatform.Application.Risk
+﻿namespace EventTicketingAiPlatform.Application.Risk
 {
     public sealed class AntifraudRiskAssessment
     {
