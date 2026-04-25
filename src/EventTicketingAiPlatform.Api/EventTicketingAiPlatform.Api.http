@@ -1,0 +1,6 @@
+@EventTicketingAiPlatform.Api_HostAddress = http://localhost:5246
+
+GET {{EventTicketingAiPlatform.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
