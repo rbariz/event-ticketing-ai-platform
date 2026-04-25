@@ -2,6 +2,7 @@
 using EventTicketingAiPlatform.Application.Domain.Enums;
 using EventTicketingAiPlatform.Application.Risk;
 using EventTicketingAiPlatform.Contracts.Dashboard;
+using EventTicketingAiPlatform.Contracts.Query;
 
 
 namespace EventTicketingAiPlatform.Application.UseCases.Dashboard
@@ -24,9 +25,19 @@ namespace EventTicketingAiPlatform.Application.UseCases.Dashboard
         }
 
         public async Task<DashboardSummaryResponse> HandleAsync(
-            CancellationToken cancellationToken = default)
+    ScanQueryRequest? query = null,
+    CancellationToken cancellationToken = default)
         {
-            var scans = await _scanRepository.GetAllAsync(cancellationToken);
+            var request = query ?? new ScanQueryRequest(null, null, null, null, null, null);
+
+            var scans = await _scanRepository.SearchAsync(
+                request.FromUtc,
+                request.ToUtc,
+                request.GateId,
+                request.Source,
+                request.Decision,
+                request.ReasonCode,
+                cancellationToken);
 
             var total = scans.Count;
             var accepted = scans.Count(x => x.Decision == ScanDecision.Accepted);

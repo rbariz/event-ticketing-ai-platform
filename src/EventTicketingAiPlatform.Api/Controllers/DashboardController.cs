@@ -1,4 +1,5 @@
 ﻿using EventTicketingAiPlatform.Application.UseCases.Dashboard;
+using EventTicketingAiPlatform.Contracts.Query;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventTicketingAiPlatform.Api.Controllers
@@ -16,9 +17,23 @@ namespace EventTicketingAiPlatform.Api.Controllers
 
         [HttpGet("summary")]
         public async Task<IActionResult> GetSummary(
-            CancellationToken cancellationToken)
+    [FromQuery] DateTime? fromUtc,
+    [FromQuery] DateTime? toUtc,
+    [FromQuery] string? gateId,
+    [FromQuery] string? source,
+    [FromQuery] string? decision,
+    [FromQuery] string? reasonCode,
+    CancellationToken cancellationToken)
         {
-            var result = await _handler.HandleAsync(cancellationToken);
+            var query = new ScanQueryRequest(
+                fromUtc,
+                toUtc,
+                gateId,
+                source,
+                decision,
+                reasonCode);
+
+            var result = await _handler.HandleAsync(query, cancellationToken);
             return Ok(result);
         }
     }

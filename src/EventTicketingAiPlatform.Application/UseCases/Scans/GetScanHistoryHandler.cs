@@ -1,4 +1,5 @@
 ﻿using EventTicketingAiPlatform.Application.Abstractions;
+using EventTicketingAiPlatform.Contracts.Query;
 using EventTicketingAiPlatform.Contracts.Scans;
 using System;
 using System.Collections.Generic;
@@ -18,9 +19,19 @@ namespace EventTicketingAiPlatform.Application.UseCases.Scans
         }
 
         public async Task<IReadOnlyList<ScanAttemptResponse>> HandleAsync(
+            ScanQueryRequest? query = null,
             CancellationToken cancellationToken = default)
         {
-            var items = await _repository.GetAllAsync(cancellationToken);
+            var request = query ?? new ScanQueryRequest(null, null, null, null, null, null);
+
+            var items = await _repository.SearchAsync(
+                request.FromUtc,
+                request.ToUtc,
+                request.GateId,
+                request.Source,
+                request.Decision,
+                request.ReasonCode,
+                cancellationToken);
 
             return items
                 .Select(x => new ScanAttemptResponse(

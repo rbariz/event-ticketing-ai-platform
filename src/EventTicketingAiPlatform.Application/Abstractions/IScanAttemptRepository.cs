@@ -23,5 +23,15 @@ namespace EventTicketingAiPlatform.Application.Abstractions
         Task<IReadOnlyList<ScanAttempt>> GetRecentAsync(
     int count,
     CancellationToken cancellationToken = default);
+
+
+        Task<IReadOnlyList<ScanAttempt>> SearchAsync(
+    DateTime? fromUtc,
+    DateTime? toUtc,
+    string? gateId,
+    string? source,
+    string? decision,
+    string? reasonCode,
+    CancellationToken cancellationToken = default);
     }
 }

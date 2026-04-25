@@ -62,5 +62,38 @@ namespace EventTicketingAiPlatform.Infrastructure.InMemory
                     .Take(count)
                     .ToList());
         }
+
+        public Task<IReadOnlyList<ScanAttempt>> SearchAsync(
+    DateTime? fromUtc,
+    DateTime? toUtc,
+    string? gateId,
+    string? source,
+    string? decision,
+    string? reasonCode,
+    CancellationToken cancellationToken = default)
+        {
+            var query = _store.ScanAttempts.AsEnumerable();
+
+            if (fromUtc.HasValue)
+                query = query.Where(x => x.ScannedAtUtc >= fromUtc.Value);
+
+            if (toUtc.HasValue)
+                query = query.Where(x => x.ScannedAtUtc <= toUtc.Value);
+
+            if (!string.IsNullOrWhiteSpace(gateId))
+                query = query.Where(x => x.GateId.Equals(gateId, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrWhiteSpace(source))
+                query = query.Where(x => string.Equals(x.Source, source, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrWhiteSpace(decision))
+                query = query.Where(x => x.Decision.ToString().Equals(decision, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrWhiteSpace(reasonCode))
+                query = query.Where(x => x.ReasonCode.ToString().Equals(reasonCode, StringComparison.OrdinalIgnoreCase));
+
+            return Task.FromResult<IReadOnlyList<ScanAttempt>>(
+                query.OrderByDescending(x => x.ScannedAtUtc).ToList());
+        }
     }
 }

@@ -62,5 +62,21 @@ namespace EventTicketingAiPlatform.Api.Tests
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
+
+        [Fact]
+        public async Task GetScans_Should_Support_Decision_Filter()
+        {
+            var response = await _client.GetAsync("/api/scans?decision=Rejected");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+        [Fact]
+        public async Task GetDashboardSummary_Should_Support_Gate_Filter()
+        {
+            var response = await _client.GetAsync("/api/dashboard/summary?gateId=GATE-A");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+
     }
 }

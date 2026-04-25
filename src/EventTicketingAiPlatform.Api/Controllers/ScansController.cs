@@ -1,6 +1,7 @@
 ﻿using EventTicketingAiPlatform.Application.UseCases.Risk;
 using EventTicketingAiPlatform.Application.UseCases.Scans;
 using EventTicketingAiPlatform.Application.UseCases.ScanValidation;
+using EventTicketingAiPlatform.Contracts.Query;
 using EventTicketingAiPlatform.Contracts.ScanValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -36,11 +37,27 @@ namespace EventTicketingAiPlatform.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetHistory(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetHistory(
+    [FromQuery] DateTime? fromUtc,
+    [FromQuery] DateTime? toUtc,
+    [FromQuery] string? gateId,
+    [FromQuery] string? source,
+    [FromQuery] string? decision,
+    [FromQuery] string? reasonCode,
+    CancellationToken cancellationToken)
         {
-            var result = await _historyHandler.HandleAsync(cancellationToken);
+            var query = new ScanQueryRequest(
+                fromUtc,
+                toUtc,
+                gateId,
+                source,
+                decision,
+                reasonCode);
+
+            var result = await _historyHandler.HandleAsync(query, cancellationToken);
             return Ok(result);
         }
+
         [HttpGet("{id:guid}/risk")]
         public async Task<IActionResult> GetRisk(
         Guid id,
@@ -74,7 +91,9 @@ namespace EventTicketingAiPlatform.Api.Controllers
             if (count > 200)
                 count = 200;
 
-            var scans = await _historyHandler.HandleAsync(cancellationToken);
+            var scans = await _historyHandler.HandleAsync(
+    new ScanQueryRequest(null, null, null, null, null, null),
+    cancellationToken);
 
             var result = scans
                 .OrderByDescending(x => x.ScannedAtUtc)
@@ -89,7 +108,9 @@ namespace EventTicketingAiPlatform.Api.Controllers
             Guid id,
             CancellationToken cancellationToken)
         {
-            var scans = await _historyHandler.HandleAsync(cancellationToken);
+            var scans = await _historyHandler.HandleAsync(
+    new ScanQueryRequest(null, null, null, null, null, null),
+    cancellationToken);
             var scan = scans.FirstOrDefault(x => x.Id == id);
 
             if (scan is null)
