@@ -32,5 +32,14 @@ namespace EventTicketingAiPlatform.Infrastructure.InMemory
 
             return Task.FromResult(result);
         }
+
+        public Task<IReadOnlyList<ScanAttempt>> GetAllAsync(
+    CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyList<ScanAttempt>>(
+                _store.ScanAttempts
+                    .OrderByDescending(x => x.ScannedAtUtc)
+                    .ToList());
+        }
     }
 }

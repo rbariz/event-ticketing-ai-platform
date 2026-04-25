@@ -1,4 +1,6 @@
-﻿using EventTicketingAiPlatform.Application.UseCases.ScanValidation;
+﻿using EventTicketingAiPlatform.Application.UseCases.Scans;
+using EventTicketingAiPlatform.Application.UseCases.ScanValidation;
+using EventTicketingAiPlatform.Application.UseCases.Tickets;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -14,6 +16,9 @@ namespace EventTicketingAiPlatform.Application.DependencyInjection
         {
             services.AddScoped<ValidateTicketScanRequestValidator>();
             services.AddScoped<ValidateTicketScanHandler>();
+
+            services.AddScoped<GetScanHistoryHandler>();
+            services.AddScoped<GetTicketByCodeHandler>();
 
             return services;
         }

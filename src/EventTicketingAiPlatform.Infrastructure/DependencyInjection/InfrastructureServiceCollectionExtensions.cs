@@ -13,11 +13,18 @@ namespace EventTicketingAiPlatform.Infrastructure.DependencyInjection
     {
         public static IServiceCollection AddInMemoryInfrastructure(this IServiceCollection services)
         {
-            services.AddSingleton<InMemoryStore>();
+            services.AddSingleton<InMemoryStore>(sp =>
+            {
+                var store = new InMemoryStore();
+                InMemorySeed.Seed(store);
+                return store;
+            });
 
             services.AddScoped<ITicketRepository, InMemoryTicketRepository>();
             services.AddScoped<IScanAttemptRepository, InMemoryScanAttemptRepository>();
             services.AddScoped<IUnitOfWork, InMemoryUnitOfWork>();
+
+            
 
             return services;
         }

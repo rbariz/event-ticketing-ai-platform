@@ -8,6 +8,9 @@ namespace EventTicketingAiPlatform.Application.Abstractions
             ScanAttempt scanAttempt,
             CancellationToken cancellationToken = default);
 
+        Task<IReadOnlyList<ScanAttempt>> GetAllAsync(
+    CancellationToken cancellationToken = default);
+
         Task<ScanAttempt?> GetRecentByTicketCodeAsync(
             string ticketCode,
             DateTime sinceUtc,

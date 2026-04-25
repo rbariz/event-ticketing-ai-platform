@@ -6,7 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-
+	<ItemGroup>
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+	</ItemGroup>
+ 
   <ItemGroup>
     <ProjectReference Include="..\EventTicketingAiPlatform.Application\EventTicketingAiPlatform.Application.csproj" />
     <ProjectReference Include="..\EventTicketingAiPlatform.Contracts\EventTicketingAiPlatform.Contracts.csproj" />
@@ -14,3 +17,6 @@
   </ItemGroup>
 
 </Project>
+
+
+

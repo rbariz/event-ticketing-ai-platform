@@ -13,6 +13,9 @@ namespace EventTicketingAiPlatform.Application.Abstractions
             string ticketCode,
             CancellationToken cancellationToken = default);
 
+        Task<IReadOnlyList<Ticket>> GetAllAsync(
+        CancellationToken cancellationToken = default);
+
         Task UpdateAsync(
             Ticket ticket,
             CancellationToken cancellationToken = default);
