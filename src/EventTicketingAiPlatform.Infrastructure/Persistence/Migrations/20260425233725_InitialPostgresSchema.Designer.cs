@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventTicketingAiPlatform.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(EventTicketingDbContext))]
-    [Migration("20260425232332_InitialPostgresSchema")]
+    [Migration("20260425233725_InitialPostgresSchema")]
     partial class InitialPostgresSchema
     {
         /// <inheritdoc />
