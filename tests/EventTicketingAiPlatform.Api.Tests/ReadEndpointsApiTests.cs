@@ -46,5 +46,21 @@ namespace EventTicketingAiPlatform.Api.Tests
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
             response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
         }
+
+        [Fact]
+        public async Task GetDashboardSummary_Should_Return_Ok()
+        {
+            var response = await _client.GetAsync("/api/dashboard/summary");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
+
+        [Fact]
+        public async Task GetRecentScans_Should_Return_Ok()
+        {
+            var response = await _client.GetAsync("/api/scans/recent?count=5");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
     }
 }

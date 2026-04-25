@@ -19,5 +19,9 @@ namespace EventTicketingAiPlatform.Application.Abstractions
         Task<ScanAttempt?> GetByIdAsync(
     Guid id,
     CancellationToken cancellationToken = default);
+
+        Task<IReadOnlyList<ScanAttempt>> GetRecentAsync(
+    int count,
+    CancellationToken cancellationToken = default);
     }
 }

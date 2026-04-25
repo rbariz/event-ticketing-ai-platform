@@ -51,5 +51,16 @@ namespace EventTicketingAiPlatform.Infrastructure.InMemory
 
             return Task.FromResult(result);
         }
+
+        public Task<IReadOnlyList<ScanAttempt>> GetRecentAsync(
+    int count,
+    CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyList<ScanAttempt>>(
+                _store.ScanAttempts
+                    .OrderByDescending(x => x.ScannedAtUtc)
+                    .Take(count)
+                    .ToList());
+        }
     }
 }

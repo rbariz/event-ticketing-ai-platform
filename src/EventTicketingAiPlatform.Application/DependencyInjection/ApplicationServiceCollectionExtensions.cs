@@ -1,4 +1,5 @@
 ﻿using EventTicketingAiPlatform.Application.Risk;
+using EventTicketingAiPlatform.Application.UseCases.Dashboard;
 using EventTicketingAiPlatform.Application.UseCases.Risk;
 using EventTicketingAiPlatform.Application.UseCases.Scans;
 using EventTicketingAiPlatform.Application.UseCases.ScanValidation;
@@ -25,6 +26,8 @@ namespace EventTicketingAiPlatform.Application.DependencyInjection
 
             // services.AddScoped<IRiskExplanationService, RuleBasedRiskExplanationService>();
             services.AddScoped<GetScanRiskAssessmentHandler>();
+
+            services.AddScoped<GetDashboardSummaryHandler>();
 
             return services;
         }

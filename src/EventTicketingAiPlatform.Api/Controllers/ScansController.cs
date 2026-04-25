@@ -62,6 +62,49 @@ namespace EventTicketingAiPlatform.Api.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("recent")]
+        public async Task<IActionResult> GetRecent(
+    [FromQuery] int count = 20,
+    CancellationToken cancellationToken = default)
+        {
+            if (count <= 0)
+                count = 20;
+
+            if (count > 200)
+                count = 200;
+
+            var scans = await _historyHandler.HandleAsync(cancellationToken);
+
+            var result = scans
+                .OrderByDescending(x => x.ScannedAtUtc)
+                .Take(count)
+                .ToList();
+
+            return Ok(result);
+        }
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(
+            Guid id,
+            CancellationToken cancellationToken)
+        {
+            var scans = await _historyHandler.HandleAsync(cancellationToken);
+            var scan = scans.FirstOrDefault(x => x.Id == id);
+
+            if (scan is null)
+            {
+                return NotFound(new ProblemDetails
+                {
+                    Title = "Scan not found",
+                    Detail = $"No scan attempt found for id '{id}'.",
+                    Status = StatusCodes.Status404NotFound,
+                    Type = "https://httpstatuses.com/404"
+                });
+            }
+
+            return Ok(scan);
+        }
     }
 
 
