@@ -22,7 +22,13 @@ namespace EventTicketingAiPlatform.Api.Controllers
             var result = await _handler.HandleAsync(code, cancellationToken);
 
             if (result is null)
-                return NotFound();
+                return NotFound(new ProblemDetails
+                {
+                    Title = "Ticket not found",
+                    Detail = $"No ticket found for code '{code}'.",
+                    Status = StatusCodes.Status404NotFound,
+                    Type = "https://httpstatuses.com/404"
+                });
 
             return Ok(result);
         }

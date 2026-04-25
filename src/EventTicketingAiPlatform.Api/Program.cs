@@ -1,3 +1,4 @@
+using EventTicketingAiPlatform.Api.Middleware;
 using EventTicketingAiPlatform.Application.DependencyInjection;
 using EventTicketingAiPlatform.Infrastructure.DependencyInjection;
 
@@ -17,6 +18,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 

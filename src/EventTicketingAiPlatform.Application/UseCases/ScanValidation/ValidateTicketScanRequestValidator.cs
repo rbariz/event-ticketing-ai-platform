@@ -1,4 +1,5 @@
-﻿using EventTicketingAiPlatform.Contracts.ScanValidation;
+﻿using EventTicketingAiPlatform.Application.Exceptions;
+using EventTicketingAiPlatform.Contracts.ScanValidation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,17 +12,22 @@ namespace EventTicketingAiPlatform.Application.UseCases.ScanValidation
     {
         public void Validate(ValidateTicketScanRequest request)
         {
+            var errors = new Dictionary<string, string[]>();
+
             if (string.IsNullOrWhiteSpace(request.TicketCode))
-                throw new ArgumentException("TicketCode is required.");
+                errors["ticketCode"] = ["TicketCode is required."];
 
             if (string.IsNullOrWhiteSpace(request.DeviceId))
-                throw new ArgumentException("DeviceId is required.");
+                errors["deviceId"] = ["DeviceId is required."];
 
             if (string.IsNullOrWhiteSpace(request.GateId))
-                throw new ArgumentException("GateId is required.");
+                errors["gateId"] = ["GateId is required."];
 
             if (request.ScannedAtUtc == default)
-                throw new ArgumentException("ScannedAtUtc is required.");
+                errors["scannedAtUtc"] = ["ScannedAtUtc is required."];
+
+            if (errors.Count > 0)
+                throw new RequestValidationException(errors);
         }
     }
 }
