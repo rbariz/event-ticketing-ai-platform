@@ -23,7 +23,7 @@ namespace EventTicketingAiPlatform.Application.DependencyInjection
             services.AddScoped<GetTicketByCodeHandler>();
             services.AddScoped<IRiskScoringService, RuleBasedRiskScoringService>();
 
-            services.AddScoped<IRiskExplanationService, RuleBasedRiskExplanationService>();
+            // services.AddScoped<IRiskExplanationService, RuleBasedRiskExplanationService>();
             services.AddScoped<GetScanRiskAssessmentHandler>();
 
             return services;

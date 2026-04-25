@@ -220,6 +220,15 @@ namespace EventTicketingAiPlatform.Application.Tests
                 return Task.FromResult<IReadOnlyList<ScanAttempt>>(
                     _items.OrderByDescending(x => x.ScannedAtUtc).ToList());
             }
+
+            public Task<ScanAttempt?> GetByIdAsync(
+            Guid id,
+            CancellationToken cancellationToken = default)
+            {
+                var result = _items.FirstOrDefault(x => x.Id == id);
+                return Task.FromResult(result);
+            }
+
             public Task<ScanAttempt?> GetRecentByTicketCodeAsync(
                 string ticketCode,
                 DateTime sinceUtc,

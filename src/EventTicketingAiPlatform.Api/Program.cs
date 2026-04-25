@@ -9,7 +9,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddApplication();
-builder.Services.AddInMemoryInfrastructure();
+builder.Services.AddInMemoryInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
