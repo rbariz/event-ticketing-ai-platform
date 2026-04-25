@@ -6,5 +6,9 @@
     string ReasonCode,
     string Message,
     Guid? TicketId,
-    Guid ScanAttemptId);
+    Guid ScanAttemptId,
+    int RiskScore,
+    string RiskLevel,
+    string RecommendedAction,
+    List<string> RiskSignals);
 }

@@ -1,6 +1,7 @@
 ﻿using EventTicketingAiPlatform.Application.Abstractions;
 using EventTicketingAiPlatform.Application.Domain.Entities;
 using EventTicketingAiPlatform.Application.Domain.Enums;
+using EventTicketingAiPlatform.Application.Risk;
 using EventTicketingAiPlatform.Contracts.ScanValidation;
 using System.Diagnostics;
 
@@ -14,17 +15,20 @@ namespace EventTicketingAiPlatform.Application.UseCases.ScanValidation
         private readonly IScanAttemptRepository _scanAttemptRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ValidateTicketScanRequestValidator _validator;
+        private readonly IRiskScoringService _riskScoringService;
 
         public ValidateTicketScanHandler(
             ITicketRepository ticketRepository,
             IScanAttemptRepository scanAttemptRepository,
             IUnitOfWork unitOfWork,
-            ValidateTicketScanRequestValidator validator)
+            ValidateTicketScanRequestValidator validator,
+            IRiskScoringService riskScoringService)
         {
             _ticketRepository = ticketRepository;
             _scanAttemptRepository = scanAttemptRepository;
             _unitOfWork = unitOfWork;
             _validator = validator;
+            _riskScoringService = riskScoringService;
         }
 
         public async Task<ValidateTicketScanResponse> HandleAsync(
@@ -153,13 +157,19 @@ namespace EventTicketingAiPlatform.Application.UseCases.ScanValidation
             await _scanAttemptRepository.AddAsync(attempt, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+            var risk = _riskScoringService.Assess(ticket, attempt, recentScan);
+
             return new ValidateTicketScanResponse(
-                Accepted: true,
-                Decision: ScanDecision.Accepted.ToString(),
-                ReasonCode: ScanReasonCode.Ok.ToString(),
-                Message: "Ticket accepted.",
-                TicketId: ticket.Id,
-                ScanAttemptId: attempt.Id);
+                    Accepted: true,
+                    Decision: ScanDecision.Accepted.ToString(),
+                    ReasonCode: ScanReasonCode.Ok.ToString(),
+                    Message: "Ticket accepted.",
+                    TicketId: ticket.Id,
+                    ScanAttemptId: attempt.Id,
+                    RiskScore: risk.RiskScore,
+                    RiskLevel: risk.RiskLevel,
+                    RecommendedAction: risk.RecommendedAction,
+                    RiskSignals: risk.RiskSignals);
         }
 
         private async Task<ValidateTicketScanResponse> RejectAsync(
@@ -189,14 +199,19 @@ namespace EventTicketingAiPlatform.Application.UseCases.ScanValidation
 
             await _scanAttemptRepository.AddAsync(attempt, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            var risk = _riskScoringService.Assess(ticketId != null ? new Ticket { Id = ticketId.Value } : null, attempt, null);
 
             return new ValidateTicketScanResponse(
-                Accepted: false,
-                Decision: ScanDecision.Rejected.ToString(),
-                ReasonCode: reasonCode.ToString(),
-                Message: message,
-                TicketId: ticketId,
-                ScanAttemptId: attempt.Id);
+                    Accepted: false,
+                    Decision: ScanDecision.Rejected.ToString(),
+                    ReasonCode: reasonCode.ToString(),
+                    Message: message,
+                    TicketId: ticketId,
+                    ScanAttemptId: attempt.Id,
+                    RiskScore: risk.RiskScore,
+                    RiskLevel: risk.RiskLevel,
+                    RecommendedAction: risk.RecommendedAction,
+                    RiskSignals: risk.RiskSignals);
         }
     }
 }

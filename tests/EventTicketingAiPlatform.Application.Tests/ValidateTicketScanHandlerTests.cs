@@ -1,6 +1,7 @@
 ﻿using EventTicketingAiPlatform.Application.Abstractions;
 using EventTicketingAiPlatform.Application.Domain.Entities;
 using EventTicketingAiPlatform.Application.Domain.Enums;
+using EventTicketingAiPlatform.Application.Risk;
 using EventTicketingAiPlatform.Application.UseCases.ScanValidation;
 using EventTicketingAiPlatform.Contracts.ScanValidation;
 using FluentAssertions;
@@ -158,7 +159,7 @@ namespace EventTicketingAiPlatform.Application.Tests
                 ticketRepo,
                 scanRepo,
                 uow,
-                new ValidateTicketScanRequestValidator());
+                new ValidateTicketScanRequestValidator(), new FakeRiskScoringService());
         }
 
         private sealed class FakeTicketRepository : ITicketRepository
@@ -237,6 +238,23 @@ namespace EventTicketingAiPlatform.Application.Tests
         {
             public Task SaveChangesAsync(CancellationToken cancellationToken = default)
                 => Task.CompletedTask;
+        }
+
+        private sealed class FakeRiskScoringService : IRiskScoringService
+        {
+            public AntifraudRiskAssessment Assess(
+                Ticket? ticket,
+                ScanAttempt attempt,
+                ScanAttempt? recentScan)
+            {
+                return new AntifraudRiskAssessment
+                {
+                    RiskScore = 10,
+                    RiskLevel = "Low",
+                    RecommendedAction = "Allow",
+                    RiskSignals = []
+                };
+            }
         }
     }
 }
