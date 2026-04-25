@@ -1,103 +1,112 @@
-﻿using EventTicketingAiPlatform.Application.Exceptions;
+﻿using System.Net;
+using System.Text.Json;
+using EventTicketingAiPlatform.Application.Exceptions;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
-namespace EventTicketingAiPlatform.Api.Middleware
+namespace EventTicketingAiPlatform.Api.Middleware;
+
+public sealed class ExceptionHandlingMiddleware
 {
-    public sealed class ExceptionHandlingMiddleware
+    private readonly RequestDelegate _next;
+    private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+
+    public ExceptionHandlingMiddleware(
+        RequestDelegate next,
+        ILogger<ExceptionHandlingMiddleware> logger)
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+        _next = next;
+        _logger = logger;
+    }
 
-        public ExceptionHandlingMiddleware(
-            RequestDelegate next,
-            ILogger<ExceptionHandlingMiddleware> logger)
+    public async Task InvokeAsync(HttpContext context)
+    {
+        try
         {
-            _next = next;
-            _logger = logger;
+            await _next(context);
         }
-
-        public async Task InvokeAsync(HttpContext context)
+        catch (Exception ex)
         {
-            try
-            {
-                await _next(context);
-            }
-            catch (Exception ex)
-            {
-                await HandleExceptionAsync(context, ex, _logger);
-            }
+            await HandleExceptionAsync(context, ex, _logger);
         }
+    }
 
-        private static async Task HandleExceptionAsync(
-            HttpContext context,
-            Exception ex,
-            ILogger logger)
+    private static async Task HandleExceptionAsync(
+        HttpContext context,
+        Exception ex,
+        ILogger logger)
+    {
+        switch (ex)
         {
-            switch (ex)
-            {
-                case RequestValidationException validationEx:
+            case RequestValidationException validationEx:
+                {
+                    var problem = new ValidationProblemDetails(
+                        validationEx.Errors.ToDictionary(x => x.Key, x => x.Value))
                     {
-                        var problem = new ValidationProblemDetails(
-                            validationEx.Errors.ToDictionary(
-                                x => x.Key,
-                                x => x.Value))
-                        {
-                            Title = "Validation failed",
-                            Detail = "One or more validation errors occurred.",
-                            Status = StatusCodes.Status400BadRequest,
-                            Type = "https://httpstatuses.com/400"
-                        };
+                        Title = "Validation failed",
+                        Detail = "One or more validation errors occurred.",
+                        Status = StatusCodes.Status400BadRequest,
+                        Type = "https://httpstatuses.com/400"
+                    };
 
-                        problem.Extensions["traceId"] = context.TraceIdentifier;
+                    problem.Extensions["traceId"] = context.TraceIdentifier;
 
-                        context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                        context.Response.ContentType = "application/problem+json";
+                    await WriteProblemAsync(context, problem);
+                    return;
+                }
 
-                        await context.Response.WriteAsJsonAsync(problem);
-                        return;
-                    }
-
-                case ArgumentException:
+            case ArgumentException:
+                {
+                    var problem = new ProblemDetails
                     {
-                        var problem = new ProblemDetails
-                        {
-                            Title = "Bad request",
-                            Detail = ex.Message,
-                            Status = StatusCodes.Status400BadRequest,
-                            Type = "https://httpstatuses.com/400"
-                        };
+                        Title = "Bad request",
+                        Detail = ex.Message,
+                        Status = StatusCodes.Status400BadRequest,
+                        Type = "https://httpstatuses.com/400"
+                    };
 
-                        problem.Extensions["traceId"] = context.TraceIdentifier;
+                    problem.Extensions["traceId"] = context.TraceIdentifier;
 
-                        context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                        context.Response.ContentType = "application/problem+json";
+                    await WriteProblemAsync(context, problem);
+                    return;
+                }
 
-                        await context.Response.WriteAsJsonAsync(problem);
-                        return;
-                    }
+            default:
+                {
+                    logger.LogError(ex, "Unhandled exception occurred.");
 
-                default:
+                    var problem = new ProblemDetails
                     {
-                        logger.LogError(ex, "Unhandled exception occurred.");
+                        Title = "Internal server error",
+                        Detail = "An unexpected error occurred.",
+                        Status = (int)HttpStatusCode.InternalServerError,
+                        Type = "https://httpstatuses.com/500"
+                    };
 
-                        var problem = new ProblemDetails
-                        {
-                            Title = "Internal server error",
-                            Detail = "An unexpected error occurred.",
-                            Status = (int)HttpStatusCode.InternalServerError,
-                            Type = "https://httpstatuses.com/500"
-                        };
+                    problem.Extensions["traceId"] = context.TraceIdentifier;
 
-                        problem.Extensions["traceId"] = context.TraceIdentifier;
-
-                        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                        context.Response.ContentType = "application/problem+json";
-
-                        await context.Response.WriteAsJsonAsync(problem);
-                        return;
-                    }
-            }
+                    await WriteProblemAsync(context, problem);
+                    return;
+                }
         }
+    }
+
+    private static async Task WriteProblemAsync(
+        HttpContext context,
+        ProblemDetails problem)
+    {
+        context.Response.StatusCode =
+            problem.Status ?? StatusCodes.Status500InternalServerError;
+
+        context.Response.ContentType = "application/problem+json";
+
+        var json = JsonSerializer.Serialize(
+            problem,
+            problem.GetType(),
+            new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+        await context.Response.WriteAsync(json, context.RequestAborted);
     }
 }

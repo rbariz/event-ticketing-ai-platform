@@ -180,6 +180,16 @@ namespace EventTicketingAiPlatform.Application.Tests
                 return Task.FromResult<Ticket?>(null);
             }
 
+            public Task<IReadOnlyList<Ticket>> GetAllAsync(
+    CancellationToken cancellationToken = default)
+            {
+                IReadOnlyList<Ticket> result = _ticket is null
+                    ? []
+                    : [_ticket];
+
+                return Task.FromResult(result);
+            }
+
             public Task UpdateAsync(
                 Ticket ticket,
                 CancellationToken cancellationToken = default)
@@ -203,7 +213,12 @@ namespace EventTicketingAiPlatform.Application.Tests
                 _items.Add(scanAttempt);
                 return Task.CompletedTask;
             }
-
+            public Task<IReadOnlyList<ScanAttempt>> GetAllAsync(
+    CancellationToken cancellationToken = default)
+            {
+                return Task.FromResult<IReadOnlyList<ScanAttempt>>(
+                    _items.OrderByDescending(x => x.ScannedAtUtc).ToList());
+            }
             public Task<ScanAttempt?> GetRecentByTicketCodeAsync(
                 string ticketCode,
                 DateTime sinceUtc,
