@@ -14,7 +14,7 @@ Build a production-grade event ticketing validation system beyond CRUD:
 - full scan audit trail
 - AI-assisted risk scoring
 - operator dashboard (Ops Center)
-- mobile scanner app (next step)
+- mobile scanner app for field operations
 
 ---
 
@@ -61,6 +61,15 @@ Build a production-grade event ticketing validation system beyond CRUD:
 - Manual scan simulation
 - Bilingual UI (EN / FR) with dynamic language switching
 
+### 📱 Mobile Scanner (MAUI)
+- Manual scan (ticket code input)
+- Camera scan (QR / barcode)
+- Real-time validation from backend API
+- AI risk analysis integration
+- Ticket lookup
+- Recent scans monitoring
+- Mobile-first UI (Blazor Hybrid)
+
 ---
 
 ## 🧠 AI & Risk Engine
@@ -84,6 +93,7 @@ AI explanation:
 - PostgreSQL + Entity Framework Core
 - Clean Architecture (Domain / Application / Infrastructure / API)
 - React frontend (Ops Center)
+- .NET MAUI Blazor Hybrid mobile app
 - InMemory + PostgreSQL interchangeable infrastructure
 
 ---
@@ -92,29 +102,21 @@ AI explanation:
 
 ### Scan validation
 
-
 POST /api/scans/validate
-
 
 ### Risk analysis
 
-
 GET /api/scans/{id}/risk?lang=en|fr
-
 
 ### Dashboard
 
-
 GET /api/dashboard/summary
-
 
 ### Scan history
 
-
-GET /api/scans
-GET /api/scans/recent
+GET /api/scans  
+GET /api/scans/recent  
 GET /api/scans/{id}
-
 
 ---
 
@@ -128,6 +130,29 @@ Features:
 - Risk analysis panel
 - Ticket lookup
 - Manual scan simulation
+
+---
+
+## 📱 Mobile Scanner (MAUI)
+
+Located in `/mobile/EventTicketingAiPlatform.Mobile.Scanner`
+
+Designed for field agents to validate tickets in real-time.
+
+### Features
+- Dual scan modes:
+  - Manual input
+  - Camera (QR / barcode)
+- Real-time validation
+- Fraud detection & risk scoring
+- AI explanation (OpenAI optional, fallback included)
+- Ticket lookup
+- Recent scans
+
+### Technical
+- .NET MAUI Blazor Hybrid
+- ZXing.Net.Maui (camera scanning)
+- Shared contracts with backend API
 
 ---
 
@@ -148,23 +173,19 @@ The system includes realistic seeded scenarios:
 
 ### Database
 
-
 ConnectionStrings:DefaultConnection
-
 
 ### OpenAI (optional)
 
-
-OpenAI__Enabled=true
+OpenAI__Enabled=true  
 OpenAI__ApiKey=your_key
-
 
 ---
 
 ## 🛡️ Fault Tolerance
 
 - OpenAI failures → automatic fallback
-- Defensive API (ProblemDetails)
+- API returns ProblemDetails
 - Safe frontend rendering (no crashes on undefined data)
 
 ---
@@ -188,13 +209,31 @@ OpenAI__ApiKey=your_key
 
 ---
 
+## 📱 Mobile Screenshots
+
+### Home
+![Mobile Home](docs/screenshots/mobile/mobile-home.png)
+
+### Manual Scan
+![Manual Scan](docs/screenshots/mobile/mobile-manual.png)
+
+### Camera Scan
+![Camera Scan](docs/screenshots/mobile/mobile-camera.png)
+
+### Ticket Lookup
+![Ticket Lookup](docs/screenshots/mobile/mobile-ticket-lookup.png)
+
+### Recent Scans
+![Recent Scans](docs/screenshots/mobile/mobile-recent.png)
+
+---
+
 ## 🚧 Roadmap
 
-1. MAUI mobile scanner app  
-2. Real-time notifications (SignalR)  
-3. Advanced fraud detection (behavioral patterns)  
-4. Multi-event / multi-tenant support  
-5. Analytics & reporting  
+1. Real-time notifications (SignalR)  
+2. Advanced fraud detection (behavioral patterns)  
+3. Multi-event / multi-tenant support  
+4. Analytics & reporting  
 
 ---
 
