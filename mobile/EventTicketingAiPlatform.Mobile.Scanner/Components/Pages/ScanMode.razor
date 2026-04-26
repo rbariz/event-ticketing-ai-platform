@@ -1,0 +1,71 @@
+﻿@page "/"
+@inject NavigationManager Nav
+
+<div class="scan-home">
+
+    <!-- HERO -->
+    <section class="hero-panel">
+        <div class="hero-badge">AI Antifraud Scanner</div>
+
+        <h1>Event Ticketing<br />AI Platform</h1>
+
+        <p class="hero-text">
+            Real-time ticket validation with antifraud risk scoring,
+            operator workflows and mobile scanning.
+        </p>
+
+        <p class="hero-text fr">
+            Validation de billets en temps réel avec scoring de risque antifraude
+            et scan mobile terrain.
+        </p>
+
+        <!-- ⚠️ OpenAI notice -->
+        <div class="hero-note">
+            ⚠️ AI explanations use OpenAI (optional).
+            If quota is not available, the system automatically falls back to rule-based analysis.
+        </div>
+    </section>
+
+    <!-- MODES -->
+    <section class="mode-grid">
+
+        <button class="mode-card primary" @onclick="GoManual">
+            <div class="mode-icon">⌨️</div>
+            <div>
+                <h2>Manual Scan</h2>
+                <p>Enter a ticket code and validate instantly</p>
+            </div>
+        </button>
+
+        <button class="mode-card dark" @onclick="GoCamera">
+            <div class="mode-icon">📷</div>
+            <div>
+                <h2>Camera Scan</h2>
+                <p>Scan QR / barcode using device camera</p>
+            </div>
+        </button>
+
+    </section>
+
+    <!-- QUICK ACTIONS -->
+    <section class="quick-actions">
+
+        <button class="quick-btn" @onclick="() => Nav.NavigateTo(lrecent)">
+            Recent Scans
+        </button>
+
+        <button class="quick-btn" @onclick="() => Nav.NavigateTo(lticket)">
+            Ticket Lookup
+        </button>
+
+    </section>
+
+</div>
+
+@code {
+    private string lrecent = "/recent";
+    private string lticket = "/ticket";
+
+    void GoManual() => Nav.NavigateTo("/scan/manual");
+    void GoCamera() => Nav.NavigateTo("/scan/camera");
+}

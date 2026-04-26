@@ -1,0 +1,193 @@
+﻿@page "/scan/camera"
+
+@using System.Globalization
+@using EventTicketingAiPlatform.Mobile.Scanner.Models
+@using EventTicketingAiPlatform.Mobile.Scanner.Services
+@using ZXing.Net.Maui
+@using ZXing.Net.Maui.Controls
+@inject ScannerApiClient Api
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <button class="icon-back" @onclick="() => Nav.NavigateTo(lhome)">
+        ←
+    </button>
+
+    <div>
+        <div class="page-kicker">Camera validation</div>
+        <h2>Camera Scan</h2>
+    </div>
+</div>
+
+<div class="card">
+    <p class="muted">
+        Point the camera at a ticket QR code or barcode.
+    </p>
+
+    <CameraBarcodeReaderView
+        class="camera-box"
+        IsDetecting="@IsDetecting"
+        BarcodesDetected="OnBarcodesDetected" />
+</div>
+
+@if (!string.IsNullOrWhiteSpace(DetectedCode))
+{
+    <div class="card">
+        <p><strong>Detected code:</strong></p>
+        <h3>@DetectedCode</h3>
+
+        <button class="btn btn-primary" disabled="@IsBusy" @onclick="ValidateDetectedAsync">
+            @(IsBusy ? "Validating..." : "Validate detected ticket")
+        </button>
+
+        <button class="btn" @onclick="ResumeScanning">
+            Scan another code
+        </button>
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <div class="alert error">@Error</div>
+}
+
+@if (Result is not null)
+{
+    <div class="card @(Result.Accepted ? "accepted" : "rejected")">
+        <h3>@Result.Decision</h3>
+        <p><strong>@Result.ReasonCode</strong></p>
+        <p>@Result.Message</p>
+
+        <p><strong>Risk:</strong> @Result.RiskScore/100 · @Result.RiskLevel</p>
+        <p><strong>Recommended:</strong> @Result.RecommendedAction</p>
+
+        @if (Result.RiskSignals.Count > 0)
+        {
+            <div class="chips">
+                @foreach (var signal in Result.RiskSignals)
+                {
+                    <span>@signal</span>
+                }
+            </div>
+        }
+    </div>
+
+    <button class="btn btn-secondary" disabled="@IsLoadingRisk" @onclick="LoadRiskAsync">
+        @(IsLoadingRisk ? "Loading AI..." : "Load AI Analysis")
+    </button>
+}
+
+@if (Risk is not null)
+{
+    <div class="card risk">
+        <h3>AI Risk Analysis</h3>
+
+        <p><strong>Summary:</strong> @Risk.ExplanationSummary</p>
+        <p><strong>Explanation:</strong> @Risk.RiskExplanation</p>
+        <p><strong>Provider:</strong> @Risk.ExplanationProvider</p>
+        <p><strong>Confidence:</strong> @Risk.ExplanationConfidence</p>
+        <p><strong>Action:</strong> @Risk.RecommendedAction</p>
+    </div>
+}
+
+@code {
+    private string lhome = "/";
+
+    private string DeviceId = "MOBILE-CAMERA-01";
+    private string GateId = "GATE-MOBILE";
+
+    private bool IsDetecting = true;
+    private bool IsBusy;
+    private bool IsLoadingRisk;
+    private string? Error;
+
+    private string? DetectedCode;
+    private ValidateScanResponse? Result;
+    private RiskResponse? Risk;
+
+    private void OnBarcodesDetected(BarcodeDetectionEventArgs e)
+    {
+        var value = e.Results?.FirstOrDefault()?.Value;
+
+        if (string.IsNullOrWhiteSpace(value))
+            return;
+
+        DetectedCode = value.Trim();
+        IsDetecting = false;
+
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void ResumeScanning()
+    {
+        DetectedCode = null;
+        Result = null;
+        Risk = null;
+        Error = null;
+        IsDetecting = true;
+    }
+
+    private async Task ValidateDetectedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(DetectedCode))
+        {
+            Error = "No ticket code detected.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            Error = null;
+            Result = null;
+            Risk = null;
+
+            Result = await Api.ValidateAsync(new ValidateScanRequest
+            {
+                TicketCode = DetectedCode.Trim(),
+                DeviceId = DeviceId,
+                GateId = GateId,
+                Source = "mobile-camera",
+                ScannedAtUtc = DateTime.UtcNow
+            });
+
+            if (Result is null)
+                Error = "Validation failed. Check API connection.";
+        }
+        catch (Exception ex)
+        {
+            Error = $"Validation error: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task LoadRiskAsync()
+    {
+        if (Result is null)
+            return;
+
+        try
+        {
+            IsLoadingRisk = true;
+            Error = null;
+
+            var lang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+
+            Risk = await Api.GetRiskAsync(Result.ScanAttemptId, lang);
+
+            if (Risk is null)
+                Error = "AI analysis unavailable.";
+        }
+        catch (Exception ex)
+        {
+            Error = $"AI analysis error: {ex.Message}";
+        }
+        finally
+        {
+            IsLoadingRisk = false;
+        }
+    }
+}

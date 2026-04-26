@@ -1,0 +1,133 @@
+﻿@page "/ticket"
+
+@using EventTicketingAiPlatform.Contracts.Scans
+@using EventTicketingAiPlatform.Contracts.Tickets
+@using EventTicketingAiPlatform.Mobile.Scanner.Models
+@using EventTicketingAiPlatform.Mobile.Scanner.Services
+@inject ScannerApiClient Api
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <button class="icon-back" @onclick="() => Nav.NavigateTo(lhome)">
+        ←
+    </button>
+
+    <div>
+        <div class="page-kicker">Ticket inspection</div>
+        <h2>Ticket Lookup</h2>
+    </div>
+</div>
+
+<div class="card">
+    <label>Ticket code</label>
+    <input class="input" @bind="TicketCode" placeholder="TCK-VALID-001" />
+
+    <button class="btn btn-primary" disabled="@IsBusy" @onclick="SearchAsync">
+        @(IsBusy ? "Searching..." : "Search")
+    </button>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <div class="alert error">@Error</div>
+}
+
+@if (Ticket is not null)
+{
+    <div class="card">
+        <h3>@(Ticket.TicketCode ?? TicketCode)</h3>
+
+        <p><strong>Status:</strong> @Ticket.Status</p>
+
+        <p>
+            <strong>Valid from:</strong>
+            @(Ticket.ValidFromUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))
+        </p>
+
+        <p>
+            <strong>Valid until:</strong>
+            @(Ticket.ValidUntilUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))
+        </p>
+
+        <p>
+            <strong>Consumed:</strong>
+            @(Ticket.ConsumedAtUtc?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-")
+        </p>
+    </div>
+
+    <div class="section-title">Related Scan Attempts</div>
+
+    @if (RelatedScans.Count == 0)
+    {
+        <div class="card">No scan attempts found.</div>
+    }
+
+    @foreach (var scan in RelatedScans)
+    {
+        <div class="card scan-item">
+            <h3>@scan.TicketCode</h3>
+
+            <p>
+                <strong>@scan.Decision</strong> · @scan.ReasonCode
+            </p>
+
+            <p>@scan.GateId · @scan.DeviceId</p>
+
+            <p>
+                @(scan.ScannedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))
+            </p>
+        </div>
+    }
+}
+
+@code {
+    private string TicketCode = "TCK-VALID-001";
+    private bool IsBusy;
+    private string? Error;
+    private string lhome = "/";
+
+    private TicketDetailsResponse? Ticket;
+    private List<ScanAttemptResponse> RelatedScans = new();
+
+    private async Task SearchAsync()
+    {
+        if (string.IsNullOrWhiteSpace(TicketCode))
+        {
+            Error = "Ticket code is required.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            Error = null;
+            Ticket = null;
+            RelatedScans.Clear();
+
+            var code = TicketCode.Trim();
+
+            Ticket = await Api.GetTicketAsync(code);
+
+            if (Ticket is null)
+            {
+                Error = "Ticket not found.";
+                return;
+            }
+
+            var scans = await Api.GetScansAsync();
+
+            RelatedScans = scans
+                .Where(x => x.TicketCode.Equals(code, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(x => x.ScannedAtUtc)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            Error = $"Lookup failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+}

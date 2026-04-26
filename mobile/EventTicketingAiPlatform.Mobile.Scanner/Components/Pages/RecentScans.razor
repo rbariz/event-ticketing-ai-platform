@@ -1,0 +1,96 @@
+﻿@page "/recent"
+
+@using EventTicketingAiPlatform.Contracts.Scans
+@using EventTicketingAiPlatform.Mobile.Scanner.Services
+@inject ScannerApiClient Api
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <button class="icon-back" @onclick="() => Nav.NavigateTo(lhome)">
+        ←
+    </button>
+
+    <div>
+        <div class="page-kicker">Live activity</div>
+        <h2>Recent Scans</h2>
+    </div>
+</div>
+
+<div class="card">
+    <button class="btn btn-primary" disabled="@IsBusy" @onclick="LoadAsync">
+        @(IsBusy ? "Loading..." : "Refresh scans")
+    </button>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <div class="alert error">@Error</div>
+}
+
+@if (Scans.Count == 0 && !IsBusy)
+{
+    <div class="card empty-state">
+        No recent scans.
+    </div>
+}
+
+<div class="scan-list">
+    @foreach (var scan in Scans)
+    {
+        <div class="card scan-card">
+            <div class="scan-card-header">
+                <h3>@scan.TicketCode</h3>
+                <span class="@DecisionClass(scan.Decision)">
+                    @scan.Decision
+                </span>
+            </div>
+
+            <p class="scan-reason">@scan.ReasonCode</p>
+
+            <div class="scan-meta">
+                <span>@scan.GateId</span>
+                <span>@scan.DeviceId</span>
+            </div>
+
+            <div class="scan-time">
+                @scan.ScannedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool IsBusy;
+    private string? Error;
+    private List<ScanAttemptResponse> Scans = new();
+    private string lhome = "/";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            Error = null;
+
+            Scans = await Api.GetRecentAsync(20);
+        }
+        catch (Exception ex)
+        {
+            Error = $"Failed to load recent scans: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private static string DecisionClass(string decision)
+        => decision.Equals("Accepted", StringComparison.OrdinalIgnoreCase)
+            ? "decision-pill accepted-pill"
+            : "decision-pill rejected-pill";
+}

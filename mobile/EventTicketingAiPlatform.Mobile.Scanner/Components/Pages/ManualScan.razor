@@ -1,0 +1,158 @@
+﻿@page "/scan/manual"
+
+@using System.Globalization
+@using EventTicketingAiPlatform.Mobile.Scanner.Models
+@using EventTicketingAiPlatform.Mobile.Scanner.Services
+@inject ScannerApiClient Api
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <button class="icon-back" @onclick="() => Nav.NavigateTo(lhome)">
+        ←
+    </button>
+
+    <div>
+        <div class="page-kicker">Manual validation</div>
+        <h2>Manual Scan</h2>
+    </div>
+</div>
+
+<div class="card">
+    <label>Ticket code</label>
+    <input class="input" @bind="TicketCode" placeholder="TCK-VALID-001" />
+
+    <label>Device</label>
+    <input class="input" @bind="DeviceId" />
+
+    <label>Gate</label>
+    <input class="input" @bind="GateId" />
+
+    <button class="btn btn-primary" disabled="@IsBusy" @onclick="ValidateAsync">
+        @(IsBusy ? "Validating..." : "Validate")
+    </button>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <div class="alert error">@Error</div>
+}
+
+@if (Result is not null)
+{
+    <div class="card @(Result.Accepted ? "accepted" : "rejected")">
+        <h3>@Result.Decision</h3>
+        <p><strong>@Result.ReasonCode</strong></p>
+        <p>@Result.Message</p>
+
+        <p><strong>Risk:</strong> @Result.RiskScore/100 · @Result.RiskLevel</p>
+        <p><strong>Recommended:</strong> @Result.RecommendedAction</p>
+
+        @if (Result.RiskSignals.Count > 0)
+        {
+            <div class="chips">
+                @foreach (var signal in Result.RiskSignals)
+                {
+                    <span>@signal</span>
+                }
+            </div>
+        }
+    </div>
+
+    <button class="btn btn-secondary" disabled="@IsLoadingRisk" @onclick="LoadRiskAsync">
+        @(IsLoadingRisk ? "Loading AI..." : "Load AI Analysis")
+    </button>
+}
+
+@if (Risk is not null)
+{
+    <div class="card risk">
+        <h3>AI Risk Analysis</h3>
+
+        <p><strong>Summary:</strong> @Risk.ExplanationSummary</p>
+        <p><strong>Explanation:</strong> @Risk.RiskExplanation</p>
+        <p><strong>Provider:</strong> @Risk.ExplanationProvider</p>
+        <p><strong>Confidence:</strong> @Risk.ExplanationConfidence</p>
+
+        <p><strong>Action:</strong> @Risk.RecommendedAction</p>
+    </div>
+}
+
+@code {
+    private string TicketCode = "TCK-VALID-001";
+    private string DeviceId = "MOBILE-01";
+    private string GateId = "GATE-MOBILE";
+
+    private string lhome = "/";
+
+    private bool IsBusy;
+    private bool IsLoadingRisk;
+    private string? Error;
+
+    private ValidateScanResponse? Result;
+    private RiskResponse? Risk;
+
+    private async Task ValidateAsync()
+    {
+        Error = null;
+        Result = null;
+        Risk = null;
+
+        if (string.IsNullOrWhiteSpace(TicketCode))
+        {
+            Error = "Ticket code is required.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+
+            Result = await Api.ValidateAsync(new ValidateScanRequest
+            {
+                TicketCode = TicketCode.Trim(),
+                DeviceId = DeviceId.Trim(),
+                GateId = GateId.Trim(),
+                Source = "mobile-manual",
+                ScannedAtUtc = DateTime.UtcNow
+            });
+
+            if (Result is null)
+                Error = "Validation failed. Check API connection.";
+        }
+        catch (Exception ex)
+        {
+            Error = $"Validation error: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task LoadRiskAsync()
+    {
+        if (Result is null)
+            return;
+
+        try
+        {
+            IsLoadingRisk = true;
+            Error = null;
+
+            var lang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+
+            Risk = await Api.GetRiskAsync(Result.ScanAttemptId, lang);
+
+            if (Risk is null)
+                Error = "AI analysis unavailable.";
+        }
+        catch (Exception ex)
+        {
+            Error = $"AI analysis error: {ex.Message}";
+        }
+        finally
+        {
+            IsLoadingRisk = false;
+        }
+    }
+}
