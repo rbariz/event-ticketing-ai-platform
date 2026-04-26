@@ -1,0 +1,148 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api, type ScanFilters } from "@/lib/api";
+import { useI18n } from "@/lib/i18n";
+import { ScanFiltersBar } from "@/components/ScanFilters";
+import { ScansTable } from "@/components/ScansTable";
+import { ScanDetailDrawer } from "@/components/ScanDetailDrawer";
+import { LoadingBlock, ErrorBlock, EmptyBlock } from "@/components/states";
+import {
+  CheckCircle2, XCircle, Copy, Clock, RotateCcw, ShieldAlert, Activity,
+} from "lucide-react";
+
+export const Route = createFileRoute("/")({
+  component: DashboardPage,
+});
+
+function DashboardPage() {
+  const { t } = useI18n();
+  const [filters, setFilters] = useState<ScanFilters>({});
+  const [openId, setOpenId] = useState<string | null>(null);
+
+  const summaryQ = useQuery({
+    queryKey: ["dashboard", "summary", filters],
+    queryFn: () => api.dashboardSummary(filters),
+  });
+
+  const recentQ = useQuery({
+    queryKey: ["scans", "recent", 20],
+    queryFn: () => api.recentScans(20),
+  });
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">{t("dashboard.title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("dashboard.subtitle")}</p>
+      </div>
+
+      <ScanFiltersBar value={filters} onChange={setFilters} />
+
+      {summaryQ.isLoading && <LoadingBlock />}
+      {summaryQ.isError && <ErrorBlock error={summaryQ.error} onRetry={() => summaryQ.refetch()} />}
+      {summaryQ.data && (
+        <>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+            <Kpi icon={Activity} label={t("kpi.total")} value={summaryQ.data.totalScans} tone="primary" />
+            <Kpi icon={CheckCircle2} label={t("kpi.accepted")} value={summaryQ.data.acceptedScans} tone="success" />
+            <Kpi icon={XCircle} label={t("kpi.rejected")} value={summaryQ.data.rejectedScans} tone="danger" />
+            <Kpi icon={Copy} label={t("kpi.duplicate")} value={summaryQ.data.duplicateScans} tone="warning" />
+            <Kpi icon={Clock} label={t("kpi.expired")} value={summaryQ.data.expiredScans} tone="muted" />
+            <Kpi icon={RotateCcw} label={t("kpi.alreadyUsed")} value={summaryQ.data.alreadyUsedScans} tone="warning" />
+            <Kpi icon={ShieldAlert} label={t("kpi.highRisk")} value={summaryQ.data.highRiskScans} tone="danger" />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <Card title={t("dashboard.topReasons")}>
+              {(summaryQ.data.topRejectReasons ?? []).length ? (
+                <BarList items={(summaryQ.data.topRejectReasons ?? []).map((r) => ({
+                  label: r.reasonCode, value: r.count,
+                }))} />
+              ) : <EmptyBlock />}
+            </Card>
+            <Card title={t("dashboard.topGates")}>
+              {(summaryQ.data.topGates ?? []).length ? (
+                <BarList items={(summaryQ.data.topGates ?? []).map((g) => ({
+                  label: g.gateId, value: g.count,
+                }))} />
+              ) : <EmptyBlock />}
+            </Card>
+          </div>
+        </>
+      )}
+
+      <Card title={t("dashboard.recent")}>
+        {recentQ.isLoading && <LoadingBlock />}
+        {recentQ.isError && <ErrorBlock error={recentQ.error} onRetry={() => recentQ.refetch()} />}
+        {recentQ.data && ((recentQ.data ?? []).length ? (
+          <ScansTable scans={recentQ.data ?? []} onSelect={setOpenId} />
+        ) : <EmptyBlock />)}
+      </Card>
+
+      <ScanDetailDrawer scanId={openId} open={!!openId} onOpenChange={(o) => !o && setOpenId(null)} />
+    </div>
+  );
+}
+
+function Card({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-lg border bg-card shadow-sm">
+      <div className="border-b px-4 py-3">
+        <h2 className="text-sm font-semibold">{title}</h2>
+      </div>
+      <div>{children}</div>
+    </section>
+  );
+}
+
+function Kpi({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: number;
+  tone: "primary" | "success" | "danger" | "warning" | "muted";
+}) {
+  const toneClass = {
+    primary: "bg-primary/10 text-primary",
+    success: "bg-emerald-50 text-emerald-700",
+    danger: "bg-red-50 text-red-700",
+    warning: "bg-amber-50 text-amber-700",
+    muted: "bg-muted text-muted-foreground",
+  }[tone];
+  return (
+    <div className="rounded-lg border bg-card p-4 shadow-sm">
+      <div className={`mb-3 inline-flex h-8 w-8 items-center justify-center rounded-md ${toneClass}`}>
+        <Icon className="h-4 w-4" />
+      </div>
+      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="mt-1 text-2xl font-bold tabular-nums">{(value ?? 0).toLocaleString()}</div>
+    </div>
+  );
+}
+
+function BarList({ items }: { items: Array<{ label: string; value: number }> }) {
+  const max = Math.max(...items.map((i) => i.value ?? 0), 1);
+  return (
+    <ul className="space-y-2 p-4">
+      {items.slice(0, 8).map((it) => (
+        <li key={it.label} className="space-y-1">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-medium">{it.label}</span>
+            <span className="tabular-nums text-muted-foreground">{(it.value ?? 0).toLocaleString()}</span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full bg-primary"
+              style={{ width: `${((it.value ?? 0) / max) * 100}%` }}
+            />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
