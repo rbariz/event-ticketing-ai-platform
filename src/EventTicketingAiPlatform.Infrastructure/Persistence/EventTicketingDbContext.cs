@@ -19,6 +19,8 @@ namespace EventTicketingAiPlatform.Infrastructure.Persistence
         public DbSet<Ticket> Tickets => Set<Ticket>();
         public DbSet<ScanAttempt> ScanAttempts => Set<ScanAttempt>();
 
+        public DbSet<AgentDecisionLog> AgentDecisionLogs => Set<AgentDecisionLog>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(EventTicketingDbContext).Assembly);
