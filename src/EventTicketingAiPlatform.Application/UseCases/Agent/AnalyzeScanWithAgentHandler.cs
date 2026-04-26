@@ -12,9 +12,6 @@ using System.Threading.Tasks;
 namespace EventTicketingAiPlatform.Application.UseCases.Agent
 {
 
-    
-
-
     public sealed class AnalyzeScanWithAgentHandler
     {
         private readonly GetScanRiskAssessmentHandler _riskHandler;

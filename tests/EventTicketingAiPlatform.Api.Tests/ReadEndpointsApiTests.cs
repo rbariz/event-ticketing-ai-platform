@@ -99,5 +99,13 @@ namespace EventTicketingAiPlatform.Api.Tests
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
+
+        [Fact]
+        public async Task GetAgentDecisionLogs_Should_Return_Ok()
+        {
+            var response = await _client.GetAsync("/api/agent/decision-logs?count=10");
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
     }
 }

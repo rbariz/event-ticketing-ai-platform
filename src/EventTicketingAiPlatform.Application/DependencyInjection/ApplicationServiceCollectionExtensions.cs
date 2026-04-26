@@ -33,6 +33,7 @@ namespace EventTicketingAiPlatform.Application.DependencyInjection
 
             services.AddScoped<IAntifraudAgent, RuleBasedAntifraudAgent>();
             services.AddScoped<AnalyzeScanWithAgentHandler>();
+            services.AddScoped<GetRecentAgentDecisionLogsHandler>();
 
             return services;
         }
