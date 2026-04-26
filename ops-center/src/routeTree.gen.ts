@@ -9,9 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TicketLookupRouteImport } from './routes/ticket-lookup'
+import { Route as ManualScanRouteImport } from './routes/manual-scan'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TicketLookupRoute = TicketLookupRouteImport.update({
+  id: '/ticket-lookup',
+  path: '/ticket-lookup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManualScanRoute = ManualScanRouteImport.update({
+  id: '/manual-scan',
+  path: '/manual-scan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HistoryRoute = HistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -26,31 +38,53 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/history': typeof HistoryRoute
+  '/manual-scan': typeof ManualScanRoute
+  '/ticket-lookup': typeof TicketLookupRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/history': typeof HistoryRoute
+  '/manual-scan': typeof ManualScanRoute
+  '/ticket-lookup': typeof TicketLookupRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/history': typeof HistoryRoute
+  '/manual-scan': typeof ManualScanRoute
+  '/ticket-lookup': typeof TicketLookupRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/history'
+  fullPaths: '/' | '/history' | '/manual-scan' | '/ticket-lookup'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/history'
-  id: '__root__' | '/' | '/history'
+  to: '/' | '/history' | '/manual-scan' | '/ticket-lookup'
+  id: '__root__' | '/' | '/history' | '/manual-scan' | '/ticket-lookup'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HistoryRoute: typeof HistoryRoute
+  ManualScanRoute: typeof ManualScanRoute
+  TicketLookupRoute: typeof TicketLookupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/ticket-lookup': {
+      id: '/ticket-lookup'
+      path: '/ticket-lookup'
+      fullPath: '/ticket-lookup'
+      preLoaderRoute: typeof TicketLookupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manual-scan': {
+      id: '/manual-scan'
+      path: '/manual-scan'
+      fullPath: '/manual-scan'
+      preLoaderRoute: typeof ManualScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/history': {
       id: '/history'
       path: '/history'
@@ -71,6 +105,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HistoryRoute: HistoryRoute,
+  ManualScanRoute: ManualScanRoute,
+  TicketLookupRoute: TicketLookupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

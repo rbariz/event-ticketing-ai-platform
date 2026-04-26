@@ -14,6 +14,19 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplication();
 //builder.Services.AddInMemoryInfrastructure(builder.Configuration);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("OpsCenter", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:5173",
+                "http://localhost:8080")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("DefaultConnection is not configured.");
 
@@ -41,7 +54,7 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
-
+app.UseCors("OpsCenter");
 app.MapControllers();
 
 app.Run();

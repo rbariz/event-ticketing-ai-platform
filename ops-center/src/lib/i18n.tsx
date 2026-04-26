@@ -67,6 +67,7 @@ const dict = {
     "manual.subtitle": "Run a validation against the antifraud engine",
     "manual.submit": "Validate",
     "manual.result": "Validation result",
+    "manual.aiUnavailable": "AI analysis unavailable",
   },
   fr: {
     "app.title": "TicketGuard Ops",
@@ -130,6 +131,7 @@ const dict = {
     "manual.subtitle": "Lancer une validation antifraude",
     "manual.submit": "Valider",
     "manual.result": "Résultat de la validation",
+    "manual.aiUnavailable": "Analyse IA indisponible",
   },
 } as const;
 

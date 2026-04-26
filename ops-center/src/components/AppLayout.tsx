@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { to: "/", labelKey: "nav.dashboard" as const, icon: LayoutDashboard, exact: true },
   { to: "/history", labelKey: "nav.history" as const, icon: History },
-  { to: "/lookup", labelKey: "nav.lookup" as const, icon: Search },
-  { to: "/manual", labelKey: "nav.manual" as const, icon: ScanLine },
+  { to: "/ticket-lookup", labelKey: "nav.lookup" as const, icon: Search },
+  { to: "/manual-scan", labelKey: "nav.manual" as const, icon: ScanLine },
 ];
 
 export function AppLayout() {

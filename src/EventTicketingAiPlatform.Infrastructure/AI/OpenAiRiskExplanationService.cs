@@ -107,10 +107,20 @@ namespace EventTicketingAiPlatform.Infrastructure.AI
 
             if (!response.IsSuccessStatusCode)
             {
+                //_logger.LogWarning(
+                //    "OpenAI risk explanation failed. StatusCode={StatusCode}, ElapsedMs={ElapsedMs}",
+                //    (int)response.StatusCode,
+                //    stopwatch.ElapsedMilliseconds);
+
+                //return BuildFallback(risk, language);
+                var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
                 _logger.LogWarning(
-                    "OpenAI risk explanation failed. StatusCode={StatusCode}, ElapsedMs={ElapsedMs}",
+                    "OpenAI risk explanation failed. StatusCode={StatusCode}, ElapsedMs={ElapsedMs}, Model={Model}, ErrorBody={ErrorBody}",
                     (int)response.StatusCode,
-                    stopwatch.ElapsedMilliseconds);
+                    stopwatch.ElapsedMilliseconds,
+                    _options.Model,
+                    errorBody);
 
                 return BuildFallback(risk, language);
             }
