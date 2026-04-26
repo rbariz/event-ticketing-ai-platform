@@ -1,4 +1,5 @@
 ﻿using EventTicketingAiPlatform.Contracts.Scans;
+using EventTicketingAiPlatform.Contracts.ScanValidation;
 using EventTicketingAiPlatform.Contracts.Tickets;
 using FluentAssertions;
 using System.Net;
@@ -77,6 +78,26 @@ namespace EventTicketingAiPlatform.Api.Tests
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
+        [Fact]
+        public async Task AnalyzeScanWithAgent_Should_Return_Ok_For_Existing_Scan()
+        {
+            var validateResponse = await _client.PostAsJsonAsync(
+    "/api/scans/validate",
+    new ValidateTicketScanRequest(
+        "UNKNOWN-AGENT-001",
+        "DEV-AGENT",
+        "GATE-X",
+        DateTime.UtcNow,
+        "api-test"));
 
+            var scanResult = await validateResponse.Content
+                .ReadFromJsonAsync<ValidateTicketScanResponse>();
+
+            var response = await _client.PostAsync(
+                $"/api/agent/analyze-scan/{scanResult!.ScanAttemptId}?lang=en",
+                null);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+        }
     }
 }
