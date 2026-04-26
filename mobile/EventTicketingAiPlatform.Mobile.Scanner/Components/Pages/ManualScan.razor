@@ -58,9 +58,15 @@
         }
     </div>
 
-    <button class="btn btn-secondary" disabled="@IsLoadingRisk" @onclick="LoadRiskAsync">
-        @(IsLoadingRisk ? "Loading AI..." : "Load AI Analysis")
-    </button>
+    <div class="action-stack">
+        <button class="btn btn-secondary" disabled="@IsLoadingRisk" @onclick="LoadRiskAsync">
+            @(IsLoadingRisk ? "Loading AI..." : "Load AI Analysis")
+        </button>
+
+        <button class="btn btn-secondary" disabled="@IsLoadingAgent" @onclick="LoadAgentAsync">
+            @(IsLoadingAgent ? "Loading Agent..." : "Analyze with Agent")
+        </button>
+    </div>
 }
 
 @if (Risk is not null)
@@ -77,6 +83,31 @@
     </div>
 }
 
+@if (AgentDecision is not null)
+{
+    <div class="card agent-card">
+        <h3>Agent Decision</h3>
+
+        <p><strong>Severity:</strong> @AgentDecision.Severity</p>
+        <p><strong>Reason:</strong> @AgentDecision.Reason</p>
+
+        <p>
+            <strong>Requires Review:</strong>
+            @(AgentDecision.RequiresHumanReview ? "Yes" : "No")
+        </p>
+
+        @if (AgentDecision.Actions.Count > 0)
+        {
+            <div class="chips">
+                @foreach (var action in AgentDecision.Actions)
+                {
+                    <span>@action</span>
+                }
+            </div>
+        }
+    </div>
+}
+
 @code {
     private string TicketCode = "TCK-VALID-001";
     private string DeviceId = "MOBILE-01";
@@ -86,16 +117,19 @@
 
     private bool IsBusy;
     private bool IsLoadingRisk;
+    private bool IsLoadingAgent;
     private string? Error;
 
     private ValidateScanResponse? Result;
     private RiskResponse? Risk;
+    private AgentDecisionResponse? AgentDecision;
 
     private async Task ValidateAsync()
     {
         Error = null;
         Result = null;
         Risk = null;
+        AgentDecision = null;
 
         if (string.IsNullOrWhiteSpace(TicketCode))
         {
@@ -153,6 +187,35 @@
         finally
         {
             IsLoadingRisk = false;
+        }
+    }
+
+    private async Task LoadAgentAsync()
+    {
+        if (Result is null)
+            return;
+
+        try
+        {
+            IsLoadingAgent = true;
+            Error = null;
+
+            var lang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+
+            AgentDecision = await Api.AnalyzeWithAgentAsync(
+                Result.ScanAttemptId,
+                lang);
+
+            if (AgentDecision is null)
+                Error = "Agent analysis unavailable.";
+        }
+        catch (Exception ex)
+        {
+            Error = $"Agent error: {ex.Message}";
+        }
+        finally
+        {
+            IsLoadingAgent = false;
         }
     }
 }

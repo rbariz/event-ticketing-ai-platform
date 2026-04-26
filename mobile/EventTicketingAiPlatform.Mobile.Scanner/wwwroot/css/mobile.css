@@ -376,3 +376,113 @@
     font-size: 14px;
     line-height: 1.45;
 }
+
+.action-stack {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.agent-card {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+    .agent-card h3 {
+        margin-top: 0;
+    }
+
+    .agent-card p {
+        margin: 6px 0;
+    }
+
+.camera-shell {
+    background: linear-gradient(135deg, #ecfdf5, #f0fdfa);
+    border: 1px solid #bbf7d0;
+    border-radius: 22px;
+    padding: 10px;
+}
+
+.camera-frame {
+    position: relative;
+    height: 320px;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #022c22;
+    border: 2px solid #22c55e;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, .15);
+}
+
+    .camera-frame zxing-camera-barcode-reader-view,
+    .camera-frame camera-barcode-reader-view,
+    .camera-frame video,
+    .camera-frame canvas {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.scan-line {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    top: 50%;
+    height: 2px;
+    background: #22c55e;
+    box-shadow: 0 0 14px rgba(34, 197, 94, .95);
+    opacity: .95;
+    pointer-events: none;
+}
+
+.camera-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+    .camera-toolbar strong {
+        display: block;
+        margin-top: 4px;
+        color: #065f46;
+        font-size: 13px;
+    }
+
+.switch-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 900;
+    color: #374151;
+}
+
+.camera-frame.paused {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, .15);
+}
+
+.camera-frame.scanning .scan-line {
+    animation: scanMove 1.7s ease-in-out infinite;
+}
+
+.scan-corners {
+    position: absolute;
+    inset: 28px;
+    border: 2px solid rgba(34, 197, 94, .85);
+    border-radius: 18px;
+    pointer-events: none;
+}
+
+@keyframes scanMove {
+    0% {
+        top: 22%;
+    }
+
+    50% {
+        top: 78%;
+    }
+
+    100% {
+        top: 22%;
+    }
+}

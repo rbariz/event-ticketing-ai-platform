@@ -7,6 +7,7 @@
 @using ZXing.Net.Maui.Controls
 @inject ScannerApiClient Api
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 
 <div class="page-header">
     <button class="icon-back" @onclick="() => Nav.NavigateTo(lhome)">
@@ -24,10 +25,30 @@
         Point the camera at a ticket QR code or barcode.
     </p>
 
-    <CameraBarcodeReaderView
-        class="camera-box"
-        IsDetecting="@IsDetecting"
-        BarcodesDetected="OnBarcodesDetected" />
+    <div class="card">
+    <div class="camera-toolbar">
+        <div>
+            <p class="muted">Point the camera at a ticket QR code or barcode.</p>
+            <strong>@ScanStatus</strong>
+        </div>
+
+        <label class="switch-row">
+            <input type="checkbox" @bind="AutoValidate" />
+            Auto
+        </label>
+    </div>
+
+    <div class="camera-shell">
+        <div class="camera-frame @(IsDetecting ? "scanning" : "paused")">
+            <CameraBarcodeReaderView
+                IsDetecting="@IsDetecting"
+                BarcodesDetected="OnBarcodesDetected" />
+
+            <div class="scan-corners"></div>
+            <div class="scan-line"></div>
+        </div>
+    </div>
+</div>
 </div>
 
 @if (!string.IsNullOrWhiteSpace(DetectedCode))
@@ -72,9 +93,15 @@
         }
     </div>
 
-    <button class="btn btn-secondary" disabled="@IsLoadingRisk" @onclick="LoadRiskAsync">
-        @(IsLoadingRisk ? "Loading AI..." : "Load AI Analysis")
-    </button>
+    <div class="action-stack">
+        <button class="btn btn-secondary" disabled="@IsLoadingRisk" @onclick="LoadRiskAsync">
+            @(IsLoadingRisk ? "Loading AI..." : "Load AI Analysis")
+        </button>
+
+        <button class="btn btn-secondary" disabled="@IsLoadingAgent" @onclick="LoadAgentAsync">
+            @(IsLoadingAgent ? "Loading Agent..." : "Analyze with Agent")
+        </button>
+    </div>
 }
 
 @if (Risk is not null)
@@ -90,8 +117,36 @@
     </div>
 }
 
+@if (AgentDecision is not null)
+{
+    <div class="card agent-card">
+        <h3>Agent Decision</h3>
+
+        <p><strong>Severity:</strong> @AgentDecision.Severity</p>
+        <p><strong>Reason:</strong> @AgentDecision.Reason</p>
+
+        <p>
+            <strong>Requires Review:</strong>
+            @(AgentDecision.RequiresHumanReview ? "Yes" : "No")
+        </p>
+
+        @if (AgentDecision.Actions.Count > 0)
+        {
+            <div class="chips">
+                @foreach (var action in AgentDecision.Actions)
+                {
+                    <span>@action</span>
+                }
+            </div>
+        }
+    </div>
+}
+
 @code {
     private string lhome = "/";
+
+    private bool AutoValidate = true;
+    private string ScanStatus = "Ready to scan";
 
     private string DeviceId = "MOBILE-CAMERA-01";
     private string GateId = "GATE-MOBILE";
@@ -99,14 +154,19 @@
     private bool IsDetecting = true;
     private bool IsBusy;
     private bool IsLoadingRisk;
+    private bool IsLoadingAgent;
     private string? Error;
 
     private string? DetectedCode;
     private ValidateScanResponse? Result;
     private RiskResponse? Risk;
+    private AgentDecisionResponse? AgentDecision;
 
-    private void OnBarcodesDetected(BarcodeDetectionEventArgs e)
+    private async void OnBarcodesDetected(BarcodeDetectionEventArgs e)
     {
+        if (!IsDetecting || IsBusy)
+            return;
+
         var value = e.Results?.FirstOrDefault()?.Value;
 
         if (string.IsNullOrWhiteSpace(value))
@@ -114,8 +174,23 @@
 
         DetectedCode = value.Trim();
         IsDetecting = false;
+        ScanStatus = "Code detected";
 
-        InvokeAsync(StateHasChanged);
+        try
+        {
+            Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(120));
+        }
+        catch
+        {
+            // Vibration may be unavailable on emulator/device.
+        }
+
+        await InvokeAsync(StateHasChanged);
+
+        if (AutoValidate)
+        {
+            await ValidateDetectedAsync();
+        }
     }
 
     private void ResumeScanning()
@@ -123,7 +198,9 @@
         DetectedCode = null;
         Result = null;
         Risk = null;
+        AgentDecision = null;
         Error = null;
+        ScanStatus = "Ready to scan";
         IsDetecting = true;
     }
 
@@ -141,6 +218,7 @@
             Error = null;
             Result = null;
             Risk = null;
+            AgentDecision = null;
 
             Result = await Api.ValidateAsync(new ValidateScanRequest
             {
@@ -151,12 +229,18 @@
                 ScannedAtUtc = DateTime.UtcNow
             });
 
+            if (Result is not null)
+            {
+                ScanStatus = Result.Accepted ? "Ticket accepted" : "Ticket rejected";
+            }
+
             if (Result is null)
                 Error = "Validation failed. Check API connection.";
         }
         catch (Exception ex)
         {
             Error = $"Validation error: {ex.Message}";
+            ScanStatus = "Validation failed";
         }
         finally
         {
@@ -188,6 +272,35 @@
         finally
         {
             IsLoadingRisk = false;
+        }
+    }
+
+    private async Task LoadAgentAsync()
+    {
+        if (Result is null)
+            return;
+
+        try
+        {
+            IsLoadingAgent = true;
+            Error = null;
+
+            var lang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+
+            AgentDecision = await Api.AnalyzeWithAgentAsync(
+                Result.ScanAttemptId,
+                lang);
+
+            if (AgentDecision is null)
+                Error = "Agent analysis unavailable.";
+        }
+        catch (Exception ex)
+        {
+            Error = $"Agent error: {ex.Message}";
+        }
+        finally
+        {
+            IsLoadingAgent = false;
         }
     }
 }
