@@ -486,3 +486,60 @@
         top: 22%;
     }
 }
+.notification-btn {
+    position: relative;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #dc2626;
+    color: white;
+    font-size: 12px;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 18px rgba(220, 38, 38, .35);
+}
+
+.notification-card.unread {
+    border-color: #fed7aa;
+    background: #fff7ed;
+}
+
+.notification-card.read {
+    opacity: .72;
+}
+
+.severity-pill {
+    padding: 6px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.info-pill {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.medium-pill {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.high-pill {
+    background: #ffedd5;
+    color: #9a3412;
+}
+
+.critical-pill {
+    background: #fee2e2;
+    color: #991b1b;
+}

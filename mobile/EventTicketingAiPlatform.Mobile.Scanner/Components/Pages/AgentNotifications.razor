@@ -1,0 +1,124 @@
+﻿@page "/notifications"
+
+@using EventTicketingAiPlatform.Mobile.Scanner.Models
+@using EventTicketingAiPlatform.Mobile.Scanner.Services
+@inject ScannerApiClient Api
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <button class="icon-back" @onclick="() => Nav.NavigateTo(lhome)">
+        ←
+    </button>
+
+    <div>
+        <div class="page-kicker">Agent alerts</div>
+        <h2>Notifications</h2>
+    </div>
+</div>
+
+<div class="card">
+    <button class="btn btn-primary" disabled="@IsBusy" @onclick="LoadAsync">
+        @(IsBusy ? "Loading..." : "Refresh")
+    </button>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <div class="alert error">@Error</div>
+}
+
+@if (Notifications.Count == 0 && !IsBusy)
+{
+    <div class="card empty-state">
+        No unread notifications.
+    </div>
+}
+
+<div class="scan-list">
+    @foreach (var item in Notifications)
+    {
+        <div class="card notification-card @(item.IsRead ? "read" : "unread")">
+            <div class="scan-card-header">
+                <h3>@item.Title</h3>
+                <span class="@SeverityClass(item.Severity)">
+                    @item.Severity
+                </span>
+            </div>
+
+            <p class="scan-reason">@item.Message</p>
+
+            <div class="scan-meta">
+                <span>Scan @item.ScanAttemptId.ToString()[..8]</span>
+                <span>@item.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span>
+            </div>
+
+            <button class="btn btn-secondary"
+                    disabled="@IsBusy"
+                    @onclick="() => MarkReadAsync(item.Id)">
+                Mark as read
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private string lhome = "/";
+    private bool IsBusy;
+    private string? Error;
+    private List<AgentNotificationResponse> Notifications = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            Error = null;
+
+            Notifications = await Api.GetAgentNotificationsAsync(
+                unreadOnly: true,
+                count: 20);
+        }
+        catch (Exception ex)
+        {
+            Error = $"Failed to load notifications: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task MarkReadAsync(Guid id)
+    {
+        try
+        {
+            IsBusy = true;
+            Error = null;
+
+            await Api.MarkAgentNotificationAsReadAsync(id);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Error = $"Failed to mark notification as read: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private static string SeverityClass(string severity)
+        => severity switch
+        {
+            "Critical" => "severity-pill critical-pill",
+            "High" => "severity-pill high-pill",
+            "Medium" => "severity-pill medium-pill",
+            _ => "severity-pill info-pill"
+        };
+}

@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using EventTicketingAiPlatform.Mobile.Scanner.Services
+@inject ScannerApiClient Api
 @inject NavigationManager Nav
 
 <div class="scan-home">
@@ -19,7 +21,7 @@
             et scan mobile terrain.
         </p>
 
-        <!-- ⚠️ OpenAI notice -->
+        <!-- OpenAI notice -->
         <div class="hero-note">
             ⚠️ AI explanations use OpenAI (optional).
             If quota is not available, the system automatically falls back to rule-based analysis.
@@ -57,6 +59,15 @@
         <button class="quick-btn" @onclick="() => Nav.NavigateTo(lticket)">
             Ticket Lookup
         </button>
+        <button class="quick-btn notification-btn"
+                @onclick="() => Nav.NavigateTo(lnotifications)">
+            Notifications
+
+            @if (UnreadCount > 0)
+            {
+                <span class="notification-badge">@UnreadCount</span>
+            }
+        </button>
 
     </section>
 
@@ -68,4 +79,23 @@
 
     void GoManual() => Nav.NavigateTo("/scan/manual");
     void GoCamera() => Nav.NavigateTo("/scan/camera");
+
+    private string lnotifications = "/notifications";
+    private int UnreadCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var notifications = await Api.GetAgentNotificationsAsync(
+                unreadOnly: true,
+                count: 20);
+
+            UnreadCount = notifications.Count;
+        }
+        catch
+        {
+            UnreadCount = 0;
+        }
+    }
 }

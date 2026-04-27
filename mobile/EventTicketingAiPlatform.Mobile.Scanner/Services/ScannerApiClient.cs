@@ -87,6 +87,27 @@ namespace EventTicketingAiPlatform.Mobile.Scanner.Services
             return await response.Content.ReadFromJsonAsync<AgentDecisionResponse>(
                 cancellationToken: cancellationToken);
         }
+        public async Task<List<AgentNotificationResponse>> GetAgentNotificationsAsync(
+    bool unreadOnly = true,
+    int count = 20,
+    CancellationToken cancellationToken = default)
+        {
+            return await _http.GetFromJsonAsync<List<AgentNotificationResponse>>(
+                $"/api/agent/notifications?unreadOnly={unreadOnly.ToString().ToLowerInvariant()}&count={count}",
+                cancellationToken) ?? [];
+        }
+
+        public async Task MarkAgentNotificationAsReadAsync(
+            Guid id,
+            CancellationToken cancellationToken = default)
+        {
+            var response = await _http.PostAsync(
+                $"/api/agent/notifications/{id}/mark-read",
+                content: null,
+                cancellationToken);
+
+            response.EnsureSuccessStatusCode();
+        }
     }
 
 }
