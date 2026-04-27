@@ -69,3 +69,46 @@ export function DecisionBadge({ decision }: { decision?: string | null }) {
     </span>
   );
 }
+
+export function SeverityBadge({ severity }: { severity?: string | null }) {
+  if (!severity) return <span className="text-muted-foreground text-xs">—</span>;
+  const s = severity.toLowerCase();
+  const styles: Record<string, string> = {
+    info: "bg-zinc-100 text-zinc-700 ring-zinc-600/20",
+    low: "bg-zinc-100 text-zinc-700 ring-zinc-600/20",
+    medium: "bg-yellow-50 text-yellow-800 ring-yellow-600/30",
+    high: "bg-orange-50 text-orange-700 ring-orange-600/30",
+    critical: "bg-red-50 text-red-700 ring-red-600/30",
+  };
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset capitalize",
+        styles[s] ?? "bg-muted text-muted-foreground ring-border",
+      )}
+    >
+      {severity}
+    </span>
+  );
+}
+
+export function ActionBadge({ action }: { action: string }) {
+  const a = action.replace(/[\s_-]/g, "").toLowerCase();
+  const styles: Record<string, string> = {
+    createincident: "bg-red-50 text-red-700 ring-red-600/25",
+    notifyops: "bg-blue-50 text-blue-700 ring-blue-600/20",
+    requiremanualreview: "bg-amber-50 text-amber-800 ring-amber-600/25",
+    monitor: "bg-zinc-100 text-zinc-700 ring-zinc-600/20",
+    noaction: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
+  };
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset",
+        styles[a] ?? "bg-muted text-muted-foreground ring-border",
+      )}
+    >
+      {action}
+    </span>
+  );
+}

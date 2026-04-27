@@ -108,6 +108,30 @@ export interface Ticket {
   [k: string]: unknown;
 }
 
+export interface AgentNotification {
+  id: string;
+  scanAttemptId: string;
+  severity: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAtUtc: string;
+  readAtUtc: string | null;
+}
+
+export interface AgentDecisionLog {
+  id: string;
+  scanAttemptId: string;
+  riskScore: number;
+  riskLevel: string;
+  severity: string;
+  actions: string[];
+  reason: string;
+  requiresHumanReview: boolean;
+  provider: string;
+  createdAtUtc: string;
+}
+
 /* ---------------- Calls ---------------- */
 export const api = {
   dashboardSummary: (filters: ScanFilters = {}) =>
@@ -126,4 +150,17 @@ export const api = {
       method: "POST",
       body: JSON.stringify(body),
     }),
+  agentNotifications: (opts: { unreadOnly?: boolean; count?: number } = {}) =>
+    apiFetch<AgentNotification[]>(
+      `/api/agent/notifications${buildQuery({
+        unreadOnly: opts.unreadOnly ? "true" : undefined,
+        count: opts.count,
+      })}`,
+    ),
+  markNotificationRead: (id: string) =>
+    apiFetch<void>(`/api/agent/notifications/${encodeURIComponent(id)}/mark-read`, {
+      method: "POST",
+    }),
+  agentDecisionLogs: (count = 20) =>
+    apiFetch<AgentDecisionLog[]>(`/api/agent/decision-logs${buildQuery({ count })}`),
 };

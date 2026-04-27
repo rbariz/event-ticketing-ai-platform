@@ -1,13 +1,15 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
-import { LayoutDashboard, History, Search, ScanLine, ShieldCheck, Globe } from "lucide-react";
+import { LayoutDashboard, History, Search, ScanLine, ShieldCheck, Globe, Activity } from "lucide-react";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const NAV = [
   { to: "/", labelKey: "nav.dashboard" as const, icon: LayoutDashboard, exact: true },
   { to: "/history", labelKey: "nav.history" as const, icon: History },
   { to: "/ticket-lookup", labelKey: "nav.lookup" as const, icon: Search },
   { to: "/manual-scan", labelKey: "nav.manual" as const, icon: ScanLine },
+  { to: "/agent-logs", labelKey: "nav.agentLogs" as const, icon: Activity },
 ];
 
 export function AppLayout() {
@@ -82,7 +84,9 @@ export function AppLayout() {
             </div>
             <span className="text-sm font-semibold">{t("app.title")}</span>
           </div>
-          <div className="flex gap-1 rounded-md bg-muted p-1">
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <div className="flex gap-1 rounded-md bg-muted p-1">
             {(["en", "fr"] as Lang[]).map((l) => (
               <button
                 key={l}
@@ -95,6 +99,7 @@ export function AppLayout() {
                 {l}
               </button>
             ))}
+            </div>
           </div>
         </header>
         <nav className="flex gap-1 overflow-x-auto border-b bg-background px-3 py-2 md:hidden">
@@ -116,6 +121,9 @@ export function AppLayout() {
             );
           })}
         </nav>
+        <header className="hidden h-14 items-center justify-end gap-3 border-b bg-background px-6 md:flex">
+          <NotificationBell />
+        </header>
         <main className="flex-1 p-4 md:p-8">
           <Outlet />
         </main>

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TicketLookupRouteImport } from './routes/ticket-lookup'
 import { Route as ManualScanRouteImport } from './routes/manual-scan'
 import { Route as HistoryRouteImport } from './routes/history'
+import { Route as AgentLogsRouteImport } from './routes/agent-logs'
 import { Route as IndexRouteImport } from './routes/index'
 
 const TicketLookupRoute = TicketLookupRouteImport.update({
@@ -29,6 +30,11 @@ const HistoryRoute = HistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgentLogsRoute = AgentLogsRouteImport.update({
+  id: '/agent-logs',
+  path: '/agent-logs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,12 +43,14 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agent-logs': typeof AgentLogsRoute
   '/history': typeof HistoryRoute
   '/manual-scan': typeof ManualScanRoute
   '/ticket-lookup': typeof TicketLookupRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agent-logs': typeof AgentLogsRoute
   '/history': typeof HistoryRoute
   '/manual-scan': typeof ManualScanRoute
   '/ticket-lookup': typeof TicketLookupRoute
@@ -50,20 +58,33 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agent-logs': typeof AgentLogsRoute
   '/history': typeof HistoryRoute
   '/manual-scan': typeof ManualScanRoute
   '/ticket-lookup': typeof TicketLookupRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/history' | '/manual-scan' | '/ticket-lookup'
+  fullPaths:
+    | '/'
+    | '/agent-logs'
+    | '/history'
+    | '/manual-scan'
+    | '/ticket-lookup'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/history' | '/manual-scan' | '/ticket-lookup'
-  id: '__root__' | '/' | '/history' | '/manual-scan' | '/ticket-lookup'
+  to: '/' | '/agent-logs' | '/history' | '/manual-scan' | '/ticket-lookup'
+  id:
+    | '__root__'
+    | '/'
+    | '/agent-logs'
+    | '/history'
+    | '/manual-scan'
+    | '/ticket-lookup'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgentLogsRoute: typeof AgentLogsRoute
   HistoryRoute: typeof HistoryRoute
   ManualScanRoute: typeof ManualScanRoute
   TicketLookupRoute: typeof TicketLookupRoute
@@ -92,6 +113,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agent-logs': {
+      id: '/agent-logs'
+      path: '/agent-logs'
+      fullPath: '/agent-logs'
+      preLoaderRoute: typeof AgentLogsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +132,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgentLogsRoute: AgentLogsRoute,
   HistoryRoute: HistoryRoute,
   ManualScanRoute: ManualScanRoute,
   TicketLookupRoute: TicketLookupRoute,

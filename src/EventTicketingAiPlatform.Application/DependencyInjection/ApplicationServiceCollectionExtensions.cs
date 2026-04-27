@@ -35,6 +35,9 @@ namespace EventTicketingAiPlatform.Application.DependencyInjection
             services.AddScoped<AnalyzeScanWithAgentHandler>();
             services.AddScoped<GetRecentAgentDecisionLogsHandler>();
 
+            services.AddScoped<GetAgentNotificationsHandler>();
+            services.AddScoped<MarkAgentNotificationAsReadHandler>();
+
             return services;
         }
     }

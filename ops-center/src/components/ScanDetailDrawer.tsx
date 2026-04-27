@@ -4,6 +4,7 @@ import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 import { LoadingBlock, ErrorBlock } from "@/components/states";
 import { DecisionBadge, ProviderBadge, RiskBadge } from "@/components/badges";
+import { Info } from "lucide-react";
 
 interface Props {
   scanId: string | null;
@@ -77,6 +78,8 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 
 export function RiskAnalysisView({ data }: { data: import("@/lib/api").RiskAnalysis }) {
   const { t } = useI18n();
+  const provider = (data.explanationProvider ?? "").toLowerCase();
+  const isFallback = provider === "fallback" || provider === "rulebased";
   return (
     <div className="space-y-4 text-sm">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -90,6 +93,13 @@ export function RiskAnalysisView({ data }: { data: import("@/lib/api").RiskAnaly
         <span className="text-xs text-muted-foreground">{t("drawer.provider")}:</span>
         <ProviderBadge provider={data.explanationProvider} />
       </div>
+
+      {isFallback && (
+        <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50/60 px-3 py-2 text-[11px] text-amber-800">
+          <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>{t("ai.fallbackHint")}</span>
+        </div>
+      )}
 
       {data.explanationSummary && (
         <div>

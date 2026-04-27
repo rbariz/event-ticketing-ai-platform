@@ -17,17 +17,20 @@ namespace EventTicketingAiPlatform.Application.UseCases.Agent
         private readonly GetScanRiskAssessmentHandler _riskHandler;
         private readonly IAntifraudAgent _agent;
         private readonly IAgentDecisionLogRepository _logRepository;
+        private readonly IAgentNotificationRepository _notificationRepo;
         private readonly IUnitOfWork _unitOfWork;
 
         public AnalyzeScanWithAgentHandler(
             GetScanRiskAssessmentHandler riskHandler,
             IAntifraudAgent agent,
             IAgentDecisionLogRepository logRepository,
-            IUnitOfWork unitOfWork)
+            IAgentNotificationRepository notificationRepo,
+            IUnitOfWork unitOfWork) 
         {
             _riskHandler = riskHandler;
             _agent = agent;
             _logRepository = logRepository;
+            _notificationRepo = notificationRepo;
             _unitOfWork = unitOfWork;
         }
 
@@ -63,6 +66,24 @@ namespace EventTicketingAiPlatform.Application.UseCases.Agent
             };
 
             await _logRepository.AddAsync(log, cancellationToken);
+
+            if (decision.Actions.Contains(AgentActionType.NotifyOps))
+            {
+                var notification = new AgentNotification
+                {
+                    Id = Guid.NewGuid(),
+                    ScanAttemptId = scanId,
+                    Severity = decision.Severity.ToString(),
+                    Title = "High risk scan detected",
+                    Message = decision.Reason,
+                    IsRead = false,
+                    CreatedAtUtc = DateTime.UtcNow
+                };
+
+                await _notificationRepo.AddAsync(notification, cancellationToken);
+            }
+
+
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return new AgentDecisionResponse(

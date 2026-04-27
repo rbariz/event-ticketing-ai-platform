@@ -5,8 +5,9 @@ import { api, type ScanFilters } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 import { ScanFiltersBar } from "@/components/ScanFilters";
 import { ScansTable } from "@/components/ScansTable";
-import { ScanDetailDrawer } from "@/components/ScanDetailDrawer";
 import { LoadingBlock, ErrorBlock, EmptyBlock } from "@/components/states";
+import { AgentDecisionList } from "@/components/AgentDecisionList";
+import { useScanDrawer } from "@/components/ScanDrawerProvider";
 import {
   CheckCircle2, XCircle, Copy, Clock, RotateCcw, ShieldAlert, Activity,
 } from "lucide-react";
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/")({
 function DashboardPage() {
   const { t } = useI18n();
   const [filters, setFilters] = useState<ScanFilters>({});
-  const [openId, setOpenId] = useState<string | null>(null);
+  const { openScan } = useScanDrawer();
 
   const summaryQ = useQuery({
     queryKey: ["dashboard", "summary", filters],
@@ -28,6 +29,11 @@ function DashboardPage() {
   const recentQ = useQuery({
     queryKey: ["scans", "recent", 20],
     queryFn: () => api.recentScans(20),
+  });
+
+  const decisionsQ = useQuery({
+    queryKey: ["agent", "decision-logs", 5],
+    queryFn: () => api.agentDecisionLogs(5),
   });
 
   return (
@@ -76,11 +82,24 @@ function DashboardPage() {
         {recentQ.isLoading && <LoadingBlock />}
         {recentQ.isError && <ErrorBlock error={recentQ.error} onRetry={() => recentQ.refetch()} />}
         {recentQ.data && ((recentQ.data ?? []).length ? (
-          <ScansTable scans={recentQ.data ?? []} onSelect={setOpenId} />
+          <ScansTable scans={recentQ.data ?? []} onSelect={openScan} />
         ) : <EmptyBlock />)}
       </Card>
 
-      <ScanDetailDrawer scanId={openId} open={!!openId} onOpenChange={(o) => !o && setOpenId(null)} />
+      <Card title={t("agent.recent")}>
+        {decisionsQ.isLoading && <LoadingBlock />}
+        {decisionsQ.isError && (
+          <div className="p-4">
+            <ErrorBlock error={decisionsQ.error} onRetry={() => decisionsQ.refetch()} />
+          </div>
+        )}
+        {decisionsQ.data &&
+          ((decisionsQ.data ?? []).length ? (
+            <AgentDecisionList logs={decisionsQ.data ?? []} compact />
+          ) : (
+            <EmptyBlock />
+          ))}
+      </Card>
     </div>
   );
 }

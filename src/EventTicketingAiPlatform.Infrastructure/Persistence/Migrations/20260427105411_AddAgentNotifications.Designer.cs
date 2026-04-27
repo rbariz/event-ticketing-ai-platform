@@ -3,6 +3,7 @@ using System;
 using EventTicketingAiPlatform.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventTicketingAiPlatform.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(EventTicketingDbContext))]
-    partial class EventTicketingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260427105411_AddAgentNotifications")]
+    partial class AddAgentNotifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,50 +93,40 @@ namespace EventTicketingAiPlatform.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at_utc");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsRead")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_read");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("message");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<DateTime?>("ReadAtUtc")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("read_at_utc");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ScanAttemptId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("scan_attempt_id");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Severity")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("severity");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("title");
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedAtUtc");
 
                     b.HasIndex("IsRead");
-
-                    b.HasIndex("ScanAttemptId");
 
                     b.ToTable("agent_notifications", (string)null);
                 });

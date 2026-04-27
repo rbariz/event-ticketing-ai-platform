@@ -9,11 +9,15 @@ namespace EventTicketingAiPlatform.Api.Controllers
     {
         private readonly AnalyzeScanWithAgentHandler _handler;
         private readonly GetRecentAgentDecisionLogsHandler _logsHandler;
+        private readonly GetAgentNotificationsHandler _notificationsHandler;
+        private readonly MarkAgentNotificationAsReadHandler _markNotificationAsReadHandler;
 
-        public AgentController(AnalyzeScanWithAgentHandler handler, GetRecentAgentDecisionLogsHandler logsHandler)
+        public AgentController(AnalyzeScanWithAgentHandler handler, GetRecentAgentDecisionLogsHandler logsHandler, GetAgentNotificationsHandler notificationsHandler, MarkAgentNotificationAsReadHandler markNotificationAsReadHandler)
         {
             _handler = handler;
             _logsHandler = logsHandler;
+            _notificationsHandler = notificationsHandler;
+            _markNotificationAsReadHandler = markNotificationAsReadHandler;
         }
 
         [HttpPost("analyze-scan/{scanId:guid}")]
@@ -51,6 +55,32 @@ namespace EventTicketingAiPlatform.Api.Controllers
                 cancellationToken);
 
             return Ok(result);
+        }
+
+        [HttpGet("notifications")]
+        public async Task<IActionResult> GetNotifications(
+    [FromQuery] bool unreadOnly = false,
+    [FromQuery] int count = 20,
+    CancellationToken cancellationToken = default)
+        {
+            var result = await _notificationsHandler.HandleAsync(
+                unreadOnly,
+                count,
+                cancellationToken);
+
+            return Ok(result);
+        }
+
+        [HttpPost("notifications/{id:guid}/mark-read")]
+        public async Task<IActionResult> MarkNotificationAsRead(
+            Guid id,
+            CancellationToken cancellationToken = default)
+        {
+            await _markNotificationAsReadHandler.HandleAsync(
+                id,
+                cancellationToken);
+
+            return NoContent();
         }
     }
 

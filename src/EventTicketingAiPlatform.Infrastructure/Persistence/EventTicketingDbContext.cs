@@ -20,6 +20,7 @@ namespace EventTicketingAiPlatform.Infrastructure.Persistence
         public DbSet<ScanAttempt> ScanAttempts => Set<ScanAttempt>();
 
         public DbSet<AgentDecisionLog> AgentDecisionLogs => Set<AgentDecisionLog>();
+        public DbSet<AgentNotification> AgentNotifications => Set<AgentNotification>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

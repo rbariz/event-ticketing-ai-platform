@@ -13,5 +13,7 @@ namespace EventTicketingAiPlatform.Infrastructure.InMemory
         public List<ScanAttempt> ScanAttempts { get; } = [];
 
         public List<AgentDecisionLog> AgentDecisionLogs { get; } = [];
+
+        public List<AgentNotification> AgentNotifications { get; } = [];
     }
 }

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EventTicketingAiPlatform.Infrastructure.Persistence.Configurations
 {
-    public sealed class AgentDecisionLogConfiguration : IEntityTypeConfiguration<AgentDecisionLog>
+    public sealed partial class AgentDecisionLogConfiguration : IEntityTypeConfiguration<AgentDecisionLog>
     {
         public void Configure(EntityTypeBuilder<AgentDecisionLog> builder)
         {
