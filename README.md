@@ -263,9 +263,6 @@ OpenAI__ApiKey=your_key
 ### Manual Scan
 ![Manual Scan](docs/screenshots/manual-scan.png)
 
-### Agent Decision
-![Agent Decision](docs/screenshots/agent-decision.png)
-
 ### Notifications
 ![Notifications](docs/screenshots/agent-notifications.png)
 
@@ -285,6 +282,12 @@ OpenAI__ApiKey=your_key
 ### Manual Scan
 ![Manual Scan](docs/screenshots/mobile/mobile-manual.png)
 
+### Manual Scan
+![AI Analysis](docs/screenshots/mobile/mobile-ai-analysis.png)
+
+### Mobile Agent Decision
+![Mobile Agent](docs/screenshots/mobile/mobile-agent.png)
+
 ### Camera Scan
 ![Camera Scan](docs/screenshots/mobile/mobile-camera.png)
 
@@ -293,6 +296,12 @@ OpenAI__ApiKey=your_key
 
 ### Recent Scans
 ![Recent Scans](docs/screenshots/mobile/mobile-recent.png)
+
+### Mobile Notifications
+![Mobile Notifications](docs/screenshots/mobile/mobile-notifications.png)
+
+### Mobile Incidents
+![Mobile Incidents](docs/screenshots/mobile/mobile-incidents.png)
 
 ---
 
