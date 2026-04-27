@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
-import { LayoutDashboard, History, Search, ScanLine, ShieldCheck, Globe, Activity } from "lucide-react";
+import { LayoutDashboard, History, Search, ScanLine, ShieldCheck, Globe, Activity, AlertOctagon } from "lucide-react";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -10,6 +10,7 @@ const NAV = [
   { to: "/ticket-lookup", labelKey: "nav.lookup" as const, icon: Search },
   { to: "/manual-scan", labelKey: "nav.manual" as const, icon: ScanLine },
   { to: "/agent-logs", labelKey: "nav.agentLogs" as const, icon: Activity },
+  { to: "/incidents", labelKey: "nav.incidents" as const, icon: AlertOctagon },
 ];
 
 export function AppLayout() {

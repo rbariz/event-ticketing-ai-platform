@@ -132,6 +132,29 @@ export interface AgentDecisionLog {
   createdAtUtc: string;
 }
 
+export type IncidentStatus = "Open" | "InProgress" | "Resolved" | string;
+export type IncidentSeverity = "Low" | "Medium" | "High" | "Critical" | string;
+
+export interface Incident {
+  id: string;
+  scanAttemptId: string;
+  severity: IncidentSeverity;
+  status: IncidentStatus;
+  title: string;
+  description: string;
+  assignedTo: string | null;
+  createdAtUtc: string;
+  assignedAtUtc: string | null;
+  resolvedAtUtc: string | null;
+  resolutionNote: string | null;
+}
+
+export interface IncidentFilters {
+  status?: string;
+  severity?: string;
+  count?: number;
+}
+
 /* ---------------- Calls ---------------- */
 export const api = {
   dashboardSummary: (filters: ScanFilters = {}) =>
@@ -163,4 +186,18 @@ export const api = {
     }),
   agentDecisionLogs: (count = 20) =>
     apiFetch<AgentDecisionLog[]>(`/api/agent/decision-logs${buildQuery({ count })}`),
+  incidents: (filters: IncidentFilters = {}) =>
+    apiFetch<Incident[]>(`/api/incidents${buildQuery(filters as Record<string, string | number | undefined>)}`),
+  incident: (id: string) =>
+    apiFetch<Incident>(`/api/incidents/${encodeURIComponent(id)}`),
+  assignIncident: (id: string, assignedTo: string) =>
+    apiFetch<Incident>(`/api/incidents/${encodeURIComponent(id)}/assign`, {
+      method: "POST",
+      body: JSON.stringify({ assignedTo }),
+    }),
+  resolveIncident: (id: string, resolutionNote: string) =>
+    apiFetch<Incident>(`/api/incidents/${encodeURIComponent(id)}/resolve`, {
+      method: "POST",
+      body: JSON.stringify({ resolutionNote }),
+    }),
 };

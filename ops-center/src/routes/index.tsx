@@ -8,6 +8,8 @@ import { ScansTable } from "@/components/ScansTable";
 import { LoadingBlock, ErrorBlock, EmptyBlock } from "@/components/states";
 import { AgentDecisionList } from "@/components/AgentDecisionList";
 import { useScanDrawer } from "@/components/ScanDrawerProvider";
+import { useIncidentDrawer } from "@/components/IncidentDrawerProvider";
+import { SeverityBadge } from "@/components/badges";
 import {
   CheckCircle2, XCircle, Copy, Clock, RotateCcw, ShieldAlert, Activity,
 } from "lucide-react";
@@ -20,6 +22,7 @@ function DashboardPage() {
   const { t } = useI18n();
   const [filters, setFilters] = useState<ScanFilters>({});
   const { openScan } = useScanDrawer();
+  const { openIncident } = useIncidentDrawer();
 
   const summaryQ = useQuery({
     queryKey: ["dashboard", "summary", filters],
@@ -34,6 +37,11 @@ function DashboardPage() {
   const decisionsQ = useQuery({
     queryKey: ["agent", "decision-logs", 5],
     queryFn: () => api.agentDecisionLogs(5),
+  });
+
+  const openIncidentsQ = useQuery({
+    queryKey: ["incidents", { status: "Open", count: 5 }],
+    queryFn: () => api.incidents({ status: "Open", count: 5 }),
   });
 
   return (
@@ -98,6 +106,37 @@ function DashboardPage() {
             <AgentDecisionList logs={decisionsQ.data ?? []} compact />
           ) : (
             <EmptyBlock />
+          ))}
+      </Card>
+
+      <Card title={t("incidents.open")}>
+        {openIncidentsQ.isLoading && <LoadingBlock />}
+        {openIncidentsQ.isError && (
+          <div className="p-4">
+            <ErrorBlock error={openIncidentsQ.error} onRetry={() => openIncidentsQ.refetch()} />
+          </div>
+        )}
+        {openIncidentsQ.data &&
+          ((openIncidentsQ.data ?? []).length ? (
+            <ul className="divide-y">
+              {(openIncidentsQ.data ?? []).map((inc) => (
+                <li
+                  key={inc.id}
+                  onClick={() => openIncident(inc.id)}
+                  className="flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40"
+                >
+                  <SeverityBadge severity={inc.severity} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium">{inc.title ?? "—"}</div>
+                  </div>
+                  <span className="text-xs tabular-nums text-muted-foreground">
+                    {inc.createdAtUtc ? new Date(inc.createdAtUtc).toLocaleString() : "—"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyBlock label={t("incidents.empty")} />
           ))}
       </Card>
     </div>

@@ -112,3 +112,23 @@ export function ActionBadge({ action }: { action: string }) {
     </span>
   );
 }
+
+export function IncidentStatusBadge({ status }: { status?: string | null }) {
+  if (!status) return <span className="text-muted-foreground text-xs">—</span>;
+  const s = status.replace(/[\s_-]/g, "").toLowerCase();
+  const styles: Record<string, string> = {
+    open: "bg-red-50 text-red-700 ring-red-600/25",
+    inprogress: "bg-blue-50 text-blue-700 ring-blue-600/20",
+    resolved: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
+  };
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset capitalize",
+        styles[s] ?? "bg-muted text-muted-foreground ring-border",
+      )}
+    >
+      {status}
+    </span>
+  );
+}

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TicketLookupRouteImport } from './routes/ticket-lookup'
 import { Route as ManualScanRouteImport } from './routes/manual-scan'
+import { Route as IncidentsRouteImport } from './routes/incidents'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as AgentLogsRouteImport } from './routes/agent-logs'
 import { Route as IndexRouteImport } from './routes/index'
@@ -23,6 +24,11 @@ const TicketLookupRoute = TicketLookupRouteImport.update({
 const ManualScanRoute = ManualScanRouteImport.update({
   id: '/manual-scan',
   path: '/manual-scan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IncidentsRoute = IncidentsRouteImport.update({
+  id: '/incidents',
+  path: '/incidents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HistoryRoute = HistoryRouteImport.update({
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agent-logs': typeof AgentLogsRoute
   '/history': typeof HistoryRoute
+  '/incidents': typeof IncidentsRoute
   '/manual-scan': typeof ManualScanRoute
   '/ticket-lookup': typeof TicketLookupRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agent-logs': typeof AgentLogsRoute
   '/history': typeof HistoryRoute
+  '/incidents': typeof IncidentsRoute
   '/manual-scan': typeof ManualScanRoute
   '/ticket-lookup': typeof TicketLookupRoute
 }
@@ -60,6 +68,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/agent-logs': typeof AgentLogsRoute
   '/history': typeof HistoryRoute
+  '/incidents': typeof IncidentsRoute
   '/manual-scan': typeof ManualScanRoute
   '/ticket-lookup': typeof TicketLookupRoute
 }
@@ -69,15 +78,23 @@ export interface FileRouteTypes {
     | '/'
     | '/agent-logs'
     | '/history'
+    | '/incidents'
     | '/manual-scan'
     | '/ticket-lookup'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/agent-logs' | '/history' | '/manual-scan' | '/ticket-lookup'
+  to:
+    | '/'
+    | '/agent-logs'
+    | '/history'
+    | '/incidents'
+    | '/manual-scan'
+    | '/ticket-lookup'
   id:
     | '__root__'
     | '/'
     | '/agent-logs'
     | '/history'
+    | '/incidents'
     | '/manual-scan'
     | '/ticket-lookup'
   fileRoutesById: FileRoutesById
@@ -86,6 +103,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgentLogsRoute: typeof AgentLogsRoute
   HistoryRoute: typeof HistoryRoute
+  IncidentsRoute: typeof IncidentsRoute
   ManualScanRoute: typeof ManualScanRoute
   TicketLookupRoute: typeof TicketLookupRoute
 }
@@ -104,6 +122,13 @@ declare module '@tanstack/react-router' {
       path: '/manual-scan'
       fullPath: '/manual-scan'
       preLoaderRoute: typeof ManualScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/incidents': {
+      id: '/incidents'
+      path: '/incidents'
+      fullPath: '/incidents'
+      preLoaderRoute: typeof IncidentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/history': {
@@ -134,6 +159,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgentLogsRoute: AgentLogsRoute,
   HistoryRoute: HistoryRoute,
+  IncidentsRoute: IncidentsRoute,
   ManualScanRoute: ManualScanRoute,
   TicketLookupRoute: TicketLookupRoute,
 }

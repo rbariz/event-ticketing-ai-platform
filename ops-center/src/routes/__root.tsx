@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { I18nProvider } from "@/lib/i18n";
 import { AppLayout } from "@/components/AppLayout";
 import { ScanDrawerProvider } from "@/components/ScanDrawerProvider";
+import { IncidentDrawerProvider } from "@/components/IncidentDrawerProvider";
 
 import appCss from "../styles.css?url";
 
@@ -83,7 +84,9 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <ScanDrawerProvider>
-          <AppLayout />
+          <IncidentDrawerProvider>
+            <AppLayout />
+          </IncidentDrawerProvider>
         </ScanDrawerProvider>
       </I18nProvider>
     </QueryClientProvider>
