@@ -57,5 +57,13 @@ namespace EventTicketingAiPlatform.Infrastructure.Persistence.Repositories
                 .Take(count)
                 .ToListAsync(cancellationToken);
         }
+
+        public Task UpdateAsync(
+    Incident incident,
+    CancellationToken cancellationToken = default)
+        {
+            _db.Incidents.Update(incident);
+            return Task.CompletedTask;
+        }
     }
 }

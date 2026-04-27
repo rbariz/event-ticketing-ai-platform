@@ -22,5 +22,9 @@ namespace EventTicketingAiPlatform.Application.Abstractions
             IncidentSeverity? severity,
             int count,
             CancellationToken cancellationToken = default);
+
+        Task UpdateAsync(
+    Incident incident,
+    CancellationToken cancellationToken = default);
     }
 }

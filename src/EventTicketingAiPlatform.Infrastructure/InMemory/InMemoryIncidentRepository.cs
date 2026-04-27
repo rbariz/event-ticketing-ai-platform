@@ -60,5 +60,17 @@ namespace EventTicketingAiPlatform.Infrastructure.InMemory
                     .Take(count)
                     .ToList());
         }
+
+        public Task UpdateAsync(
+     Incident incident,
+     CancellationToken cancellationToken = default)
+        {
+            var index = _store.Incidents.FindIndex(x => x.Id == incident.Id);
+
+            if (index >= 0)
+                _store.Incidents[index] = incident;
+
+            return Task.CompletedTask;
+        }
     }
 }

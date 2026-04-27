@@ -2,6 +2,7 @@
 using EventTicketingAiPlatform.Application.Risk;
 using EventTicketingAiPlatform.Application.UseCases.Agent;
 using EventTicketingAiPlatform.Application.UseCases.Dashboard;
+using EventTicketingAiPlatform.Application.UseCases.Incidents;
 using EventTicketingAiPlatform.Application.UseCases.Risk;
 using EventTicketingAiPlatform.Application.UseCases.Scans;
 using EventTicketingAiPlatform.Application.UseCases.ScanValidation;
@@ -37,6 +38,12 @@ namespace EventTicketingAiPlatform.Application.DependencyInjection
 
             services.AddScoped<GetAgentNotificationsHandler>();
             services.AddScoped<MarkAgentNotificationAsReadHandler>();
+
+
+            services.AddScoped<GetIncidentsHandler>();
+            services.AddScoped<GetIncidentByIdHandler>();
+            services.AddScoped<AssignIncidentHandler>();
+            services.AddScoped<ResolveIncidentHandler>();
 
             return services;
         }
