@@ -1,6 +1,6 @@
 # Event Ticketing AI Platform
 
-Real-time ticket validation platform focused on antifraud, high-concurrency validation, AI-assisted risk scoring, and operator workflows.
+Real-time ticket validation platform focused on antifraud, high-concurrency validation, AI-assisted and rule-based risk scoring, and operator workflows.
 
 ---
 
@@ -159,6 +159,7 @@ GET /api/agent/notifications
 POST /api/agent/notifications/{id}/mark-read
 
 ### Incidents
+Incident management endpoints for ops workflow.
 
 GET /api/incidents
 GET /api/incidents/{id}
@@ -195,6 +196,9 @@ Designed for field agents to validate tickets in real-time.
 - AI explanation (OpenAI optional, fallback included)
 - Ticket lookup
 - Recent scans
+- Agent decision display
+- Notifications system (badge + alerts)
+- Incident monitoring and workflow
 
 ### Technical
 - .NET MAUI Blazor Hybrid
@@ -251,7 +255,7 @@ OpenAI__ApiKey=your_key
 ### Scan History
 ![Scan History](docs/screenshots/scan-history.png)
 
-### Scan History
+### Scan Details
 ![Scan Details](docs/screenshots/scan-details.png)
 
 ### Risk Analysis
