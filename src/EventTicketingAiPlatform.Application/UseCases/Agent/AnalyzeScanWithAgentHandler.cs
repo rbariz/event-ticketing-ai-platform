@@ -20,6 +20,7 @@ namespace EventTicketingAiPlatform.Application.UseCases.Agent
         private readonly IAgentDecisionLogRepository _logRepository;
         private readonly IAgentNotificationRepository _notificationRepo;
         private readonly IIncidentRepository _incidentRepository;
+        private readonly IAgentEnrichmentService _enrichmentService;
         private readonly IUnitOfWork _unitOfWork;
 
         public AnalyzeScanWithAgentHandler(
@@ -28,6 +29,7 @@ namespace EventTicketingAiPlatform.Application.UseCases.Agent
             IAgentDecisionLogRepository logRepository,
             IAgentNotificationRepository notificationRepo,
             IIncidentRepository incidentRepository,
+            IAgentEnrichmentService enrichmentService,
             IUnitOfWork unitOfWork) 
         {
             _riskHandler = riskHandler;
@@ -35,6 +37,7 @@ namespace EventTicketingAiPlatform.Application.UseCases.Agent
             _logRepository = logRepository;
             _notificationRepo = notificationRepo;
             _incidentRepository = incidentRepository;
+            _enrichmentService = enrichmentService;
             _unitOfWork = unitOfWork;
         }
 
@@ -54,6 +57,11 @@ namespace EventTicketingAiPlatform.Application.UseCases.Agent
             var decision = await _agent.AnalyzeAsync(
                 risk,
                 cancellationToken);
+            var enrichment = await _enrichmentService.EnrichAsync(
+                        risk,
+                        decision,
+                        language,
+                        cancellationToken);
 
             var log = new AgentDecisionLog
             {
@@ -113,10 +121,16 @@ namespace EventTicketingAiPlatform.Application.UseCases.Agent
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return new AgentDecisionResponse(
-                decision.Severity.ToString(),
-                decision.Actions.Select(x => x.ToString()).ToList(),
-                decision.Reason,
-                decision.RequiresHumanReview);
+                    decision.Severity.ToString(),
+                    decision.Actions.Select(x => x.ToString()).ToList(),
+                    decision.Reason,
+                    decision.RequiresHumanReview,
+                    new AgentEnrichmentResponse(
+                        enrichment.OperatorSummary,
+                        enrichment.SuggestedNextActions,
+                        enrichment.ConfidenceScore,
+                        enrichment.BusinessImpact,
+                        enrichment.Provider));
         }
 
 

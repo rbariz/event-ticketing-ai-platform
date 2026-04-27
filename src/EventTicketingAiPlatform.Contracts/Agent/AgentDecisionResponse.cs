@@ -10,5 +10,6 @@ namespace EventTicketingAiPlatform.Contracts.Agent
     string Severity,
     IReadOnlyList<string> Actions,
     string Reason,
-    bool RequiresHumanReview);
+    bool RequiresHumanReview,
+    AgentEnrichmentResponse? Enrichment = null);
 }
