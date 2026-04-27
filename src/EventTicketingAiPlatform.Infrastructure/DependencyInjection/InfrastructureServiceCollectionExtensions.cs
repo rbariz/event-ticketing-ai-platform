@@ -1,4 +1,5 @@
 ﻿using EventTicketingAiPlatform.Application.Abstractions;
+using EventTicketingAiPlatform.Application.Agent;
 using EventTicketingAiPlatform.Application.Options;
 using EventTicketingAiPlatform.Application.Risk;
 using EventTicketingAiPlatform.Infrastructure.AI;
@@ -79,6 +80,18 @@ namespace EventTicketingAiPlatform.Infrastructure.DependencyInjection
                     return sp.GetRequiredService<OpenAiRiskExplanationService>();
 
                 return new RuleBasedRiskExplanationService();
+            });
+
+            services.AddHttpClient<OpenAiAgentEnrichmentService>();
+
+            services.AddScoped<IAgentEnrichmentService>(sp =>
+            {
+                var options = sp.GetRequiredService<IOptions<OpenAiOptions>>().Value;
+
+                if (options.Enabled && !string.IsNullOrWhiteSpace(options.ApiKey))
+                    return sp.GetRequiredService<OpenAiAgentEnrichmentService>();
+
+                return new RuleBasedAgentEnrichmentService();
             });
 
             return services;
