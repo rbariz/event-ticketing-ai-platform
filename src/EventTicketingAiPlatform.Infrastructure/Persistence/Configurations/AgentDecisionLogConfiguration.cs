@@ -30,5 +30,5 @@ namespace EventTicketingAiPlatform.Infrastructure.Persistence.Configurations
             builder.HasIndex(x => x.CreatedAtUtc);
             builder.HasIndex(x => x.Severity);
         }
-    }
+}
 }

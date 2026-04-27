@@ -15,5 +15,7 @@ namespace EventTicketingAiPlatform.Infrastructure.InMemory
         public List<AgentDecisionLog> AgentDecisionLogs { get; } = [];
 
         public List<AgentNotification> AgentNotifications { get; } = [];
+
+        public List<Incident> Incidents { get; } = [];
     }
 }

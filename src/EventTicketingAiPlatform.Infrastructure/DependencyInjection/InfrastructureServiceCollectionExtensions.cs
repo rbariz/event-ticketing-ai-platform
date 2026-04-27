@@ -34,6 +34,7 @@ namespace EventTicketingAiPlatform.Infrastructure.DependencyInjection
             services.AddScoped<IScanAttemptRepository, InMemoryScanAttemptRepository>();
             services.AddScoped<IAgentDecisionLogRepository, InMemoryAgentDecisionLogRepository>();
             services.AddScoped<IAgentNotificationRepository, InMemoryAgentNotificationRepository>();
+            services.AddScoped<IIncidentRepository, InMemoryIncidentRepository>();
             services.AddScoped<IUnitOfWork, InMemoryUnitOfWork>();
 
             services.AddRiskExplanation(configuration);
@@ -53,6 +54,7 @@ namespace EventTicketingAiPlatform.Infrastructure.DependencyInjection
             services.AddScoped<IScanAttemptRepository, PgScanAttemptRepository>();
             services.AddScoped<IAgentDecisionLogRepository, PgAgentDecisionLogRepository>();
             services.AddScoped<IAgentNotificationRepository, PgAgentNotificationRepository>();
+            services.AddScoped<IIncidentRepository, PgIncidentRepository>();
             services.AddScoped<IUnitOfWork, PgUnitOfWork>();
 
             services.AddRiskExplanation(configuration);

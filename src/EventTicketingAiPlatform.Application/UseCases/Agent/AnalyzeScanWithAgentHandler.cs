@@ -1,6 +1,7 @@
 ﻿using EventTicketingAiPlatform.Application.Abstractions;
 using EventTicketingAiPlatform.Application.Agent;
 using EventTicketingAiPlatform.Application.Domain.Entities;
+using EventTicketingAiPlatform.Application.Domain.Enums;
 using EventTicketingAiPlatform.Application.UseCases.Risk;
 using EventTicketingAiPlatform.Contracts.Agent;
 using System;
@@ -18,6 +19,7 @@ namespace EventTicketingAiPlatform.Application.UseCases.Agent
         private readonly IAntifraudAgent _agent;
         private readonly IAgentDecisionLogRepository _logRepository;
         private readonly IAgentNotificationRepository _notificationRepo;
+        private readonly IIncidentRepository _incidentRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public AnalyzeScanWithAgentHandler(
@@ -25,12 +27,14 @@ namespace EventTicketingAiPlatform.Application.UseCases.Agent
             IAntifraudAgent agent,
             IAgentDecisionLogRepository logRepository,
             IAgentNotificationRepository notificationRepo,
+            IIncidentRepository incidentRepository,
             IUnitOfWork unitOfWork) 
         {
             _riskHandler = riskHandler;
             _agent = agent;
             _logRepository = logRepository;
             _notificationRepo = notificationRepo;
+            _incidentRepository = incidentRepository;
             _unitOfWork = unitOfWork;
         }
 
@@ -82,6 +86,28 @@ namespace EventTicketingAiPlatform.Application.UseCases.Agent
 
                 await _notificationRepo.AddAsync(notification, cancellationToken);
             }
+            if (decision.Actions.Contains(AgentActionType.CreateIncident))
+            {
+                var existing = await _incidentRepository.GetOpenByScanAttemptIdAsync(
+                    scanId,
+                    cancellationToken);
+
+                if (existing is null)
+                {
+                    var incident = new Incident
+                    {
+                        Id = Guid.NewGuid(),
+                        ScanAttemptId = scanId,
+                        Severity = MapSeverity(decision.Severity),
+                        Status = IncidentStatus.Open,
+                        Title = "High risk scan incident",
+                        Description = decision.Reason,
+                        CreatedAtUtc = DateTime.UtcNow
+                    };
+
+                    await _incidentRepository.AddAsync(incident, cancellationToken);
+                }
+            }
 
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -91,6 +117,18 @@ namespace EventTicketingAiPlatform.Application.UseCases.Agent
                 decision.Actions.Select(x => x.ToString()).ToList(),
                 decision.Reason,
                 decision.RequiresHumanReview);
+        }
+
+
+        private static IncidentSeverity MapSeverity(AgentSeverity severity)
+        {
+            return severity switch
+            {
+                AgentSeverity.Critical => IncidentSeverity.Critical,
+                AgentSeverity.High => IncidentSeverity.High,
+                AgentSeverity.Medium => IncidentSeverity.Medium,
+                _ => IncidentSeverity.Low
+            };
         }
     }
 }
