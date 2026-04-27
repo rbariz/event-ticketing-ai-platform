@@ -41,6 +41,27 @@ Build a production-grade event ticketing validation system beyond CRUD:
 - Automatic fallback (no dependency on external AI)
 - Bilingual support (EN / FR)
 
+### 🤖 Antifraud Agent
+
+- Rule-based decision engine
+- Actions:
+  - NotifyOps
+  - CreateIncident
+  - RequireManualReview
+- Deterministic and auditable decisions
+- Integrated with risk scoring and AI explanations
+
+### 🚨 Incident Management
+
+- Automatic incident creation from agent decisions
+- Incident lifecycle:
+  - Open
+  - In Progress
+  - Resolved
+- Assignment workflow
+- Resolution tracking
+- Full auditability for operations teams
+
 ### API layer
 - Clean REST endpoints
 - ProblemDetails error handling
@@ -56,10 +77,16 @@ Build a production-grade event ticketing validation system beyond CRUD:
 - React + Vite + Tailwind
 - Dashboard with KPIs
 - Scan history with advanced filters
-- Risk analysis panel with AI explanations
+- Risk analysis panel (AI + fallback)
+- Agent decision logs
+- Notifications system (badge + alerts)
+- Incident management workflow:
+  - list / filter
+  - assign
+  - resolve
 - Ticket lookup
 - Manual scan simulation
-- Bilingual UI (EN / FR) with dynamic language switching
+- Bilingual UI (EN / FR)
 
 ### 📱 Mobile Scanner (MAUI)
 - Manual scan (ticket code input)
@@ -68,6 +95,10 @@ Build a production-grade event ticketing validation system beyond CRUD:
 - AI risk analysis integration
 - Ticket lookup
 - Recent scans monitoring
+- Agent decision display
+- Notifications badge
+- Incident monitoring
+- Assign / resolve incidents (field ops)
 - Mobile-first UI (Blazor Hybrid)
 
 ---
@@ -117,6 +148,22 @@ GET /api/dashboard/summary
 GET /api/scans  
 GET /api/scans/recent  
 GET /api/scans/{id}
+
+### Agent
+
+POST /api/agent/analyze-scan/{id}
+
+GET /api/agent/decision-logs
+
+GET /api/agent/notifications
+POST /api/agent/notifications/{id}/mark-read
+
+### Incidents
+
+GET /api/incidents
+GET /api/incidents/{id}
+POST /api/incidents/{id}/assign
+POST /api/incidents/{id}/resolve
 
 ---
 
@@ -190,13 +237,22 @@ OpenAI__ApiKey=your_key
 
 ---
 
-## 📸 Screenshots
+## 📸 Screenshots Web
 
 ### Dashboard
 ![Dashboard](docs/screenshots/dashboard.png)
 
+### Dashboard Recents Scans
+![Dashboard Recents Scans](docs/screenshots/dashboard-recents.png)
+
+### Dashboard Decisions & Open Incidents
+![Dashboard Decisions & Open Incidents](docs/screenshots/dashboard-decisions-open-incidents.png)
+
 ### Scan History
 ![Scan History](docs/screenshots/scan-history.png)
+
+### Scan History
+![Scan Details](docs/screenshots/scan-details.png)
 
 ### Risk Analysis
 ![Risk Analysis](docs/screenshots/risk-analysis.png)
@@ -206,6 +262,18 @@ OpenAI__ApiKey=your_key
 
 ### Manual Scan
 ![Manual Scan](docs/screenshots/manual-scan.png)
+
+### Agent Decision
+![Agent Decision](docs/screenshots/agent-decision.png)
+
+### Notifications
+![Notifications](docs/screenshots/agent-notifications.png)
+
+### Incidents List
+![Incidents](docs/screenshots/incidents-list.png)
+
+### Incident Detail
+![Incident Detail](docs/screenshots/incident-detail.png)
 
 ---
 

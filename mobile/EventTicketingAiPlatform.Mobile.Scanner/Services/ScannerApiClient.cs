@@ -108,6 +108,61 @@ namespace EventTicketingAiPlatform.Mobile.Scanner.Services
 
             response.EnsureSuccessStatusCode();
         }
+
+        public async Task<List<IncidentResponse>> GetIncidentsAsync(
+    string? status = "Open",
+    string? severity = null,
+    int count = 50,
+    CancellationToken cancellationToken = default)
+        {
+            var url = $"/api/incidents?count={count}";
+
+            if (!string.IsNullOrWhiteSpace(status))
+                url += $"&status={Uri.EscapeDataString(status)}";
+
+            if (!string.IsNullOrWhiteSpace(severity))
+                url += $"&severity={Uri.EscapeDataString(severity)}";
+
+            return await _http.GetFromJsonAsync<List<IncidentResponse>>(
+                url,
+                cancellationToken) ?? [];
+        }
+
+        public async Task<IncidentResponse?> AssignIncidentAsync(
+            Guid id,
+            string assignedTo,
+            CancellationToken cancellationToken = default)
+        {
+            var response = await _http.PostAsJsonAsync(
+                $"/api/incidents/{id}/assign",
+                new AssignIncidentRequest { AssignedTo = assignedTo },
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            return await response.Content.ReadFromJsonAsync<IncidentResponse>(
+                cancellationToken: cancellationToken);
+        }
+
+        public async Task<IncidentResponse?> ResolveIncidentAsync(
+            Guid id,
+            string resolutionNote,
+            CancellationToken cancellationToken = default)
+        {
+            var response = await _http.PostAsJsonAsync(
+                $"/api/incidents/{id}/resolve",
+                new ResolveIncidentRequest { ResolutionNote = resolutionNote },
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            return await response.Content.ReadFromJsonAsync<IncidentResponse>(
+                cancellationToken: cancellationToken);
+        }
     }
+
+
 
 }

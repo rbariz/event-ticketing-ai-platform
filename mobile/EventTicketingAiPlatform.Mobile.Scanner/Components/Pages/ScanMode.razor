@@ -68,6 +68,9 @@
                 <span class="notification-badge">@UnreadCount</span>
             }
         </button>
+        <button class="quick-btn" @onclick="() => Nav.NavigateTo(lincidents)">
+            Incidents
+        </button>
 
     </section>
 
@@ -76,6 +79,7 @@
 @code {
     private string lrecent = "/recent";
     private string lticket = "/ticket";
+    private string lincidents = "/incidents";
 
     void GoManual() => Nav.NavigateTo("/scan/manual");
     void GoCamera() => Nav.NavigateTo("/scan/camera");

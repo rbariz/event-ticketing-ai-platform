@@ -543,3 +543,10 @@
     background: #fee2e2;
     color: #991b1b;
 }
+.incident-card {
+    border-color: #fed7aa;
+}
+
+    .incident-card label {
+        margin-top: 6px;
+    }

@@ -1,0 +1,167 @@
+﻿@page "/incidents"
+
+@using EventTicketingAiPlatform.Mobile.Scanner.Models
+@using EventTicketingAiPlatform.Mobile.Scanner.Services
+@inject ScannerApiClient Api
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <button class="icon-back" @onclick="() => Nav.NavigateTo(lhome)">←</button>
+
+    <div>
+        <div class="page-kicker">Ops workflow</div>
+        <h2>Incidents</h2>
+    </div>
+</div>
+
+<div class="card">
+    <button class="btn btn-primary" disabled="@IsBusy" @onclick="LoadAsync">
+        @(IsBusy ? "Loading..." : "Refresh incidents")
+    </button>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <div class="alert error">@Error</div>
+}
+
+@if (Incidents.Count == 0 && !IsBusy)
+{
+    <div class="card empty-state">No open incidents.</div>
+}
+
+<div class="scan-list">
+    @foreach (var incident in Incidents)
+    {
+        <div class="card incident-card">
+            <div class="scan-card-header">
+                <h3>@incident.Title</h3>
+                <span class="@SeverityClass(incident.Severity)">
+                    @incident.Severity
+                </span>
+            </div>
+
+            <p class="scan-reason">@incident.Description</p>
+
+            <div class="scan-meta">
+                <span>@incident.Status</span>
+                <span>@(incident.AssignedTo ?? "Unassigned")</span>
+                <span>@incident.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</span>
+            </div>
+
+            <label>Assign to</label>
+            <input class="input" @bind="AssignTo" placeholder="ops-team" />
+
+            <button class="btn btn-secondary"
+                    disabled="@IsBusy"
+                    @onclick="() => AssignAsync(incident.Id)">
+                Assign
+            </button>
+
+            <label>Resolution note</label>
+            <input class="input" @bind="ResolutionNote" placeholder="Resolution note..." />
+
+            <button class="btn"
+                    disabled="@IsBusy"
+                    @onclick="() => ResolveAsync(incident.Id)">
+                Resolve
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private string lhome = "/";
+    private bool IsBusy;
+    private string? Error;
+
+    private string AssignTo = "ops-team";
+    private string ResolutionNote = "Reviewed and handled by field operator.";
+
+    private List<IncidentResponse> Incidents = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            Error = null;
+
+            Incidents = await Api.GetIncidentsAsync(status: "Open", count: 50);
+        }
+        catch (Exception ex)
+        {
+            Error = $"Failed to load incidents: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task AssignAsync(Guid id)
+    {
+        if (string.IsNullOrWhiteSpace(AssignTo))
+        {
+            Error = "Assigned user is required.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            Error = null;
+
+            await Api.AssignIncidentAsync(id, AssignTo);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Error = $"Assign failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task ResolveAsync(Guid id)
+    {
+        if (string.IsNullOrWhiteSpace(ResolutionNote))
+        {
+            Error = "Resolution note is required.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            Error = null;
+
+            await Api.ResolveIncidentAsync(id, ResolutionNote);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Error = $"Resolve failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private static string SeverityClass(string severity)
+        => severity switch
+        {
+            "Critical" => "severity-pill critical-pill",
+            "High" => "severity-pill high-pill",
+            "Medium" => "severity-pill medium-pill",
+            _ => "severity-pill info-pill"
+        };
+}
