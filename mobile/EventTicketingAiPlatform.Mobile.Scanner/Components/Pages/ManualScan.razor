@@ -106,6 +106,30 @@
             </div>
         }
     </div>
+
+    @if (AgentDecision.Enrichment is not null)
+    {
+        <div class="agent-enrichment">
+            <div class="section-title">Agent V2 Enrichment</div>
+
+            <p><strong>Summary:</strong> @AgentDecision.Enrichment.OperatorSummary</p>
+            <p><strong>Business impact:</strong> @AgentDecision.Enrichment.BusinessImpact</p>
+            <p><strong>Confidence:</strong> @AgentDecision.Enrichment.ConfidenceScore</p>
+            <p><strong>Provider:</strong> @AgentDecision.Enrichment.Provider</p>
+
+            @if (AgentDecision.Enrichment.SuggestedNextActions.Count > 0)
+            {
+                <p><strong>Suggested actions:</strong></p>
+
+                <div class="chips">
+                    @foreach (var action in AgentDecision.Enrichment.SuggestedNextActions)
+                    {
+                        <span>@action</span>
+                    }
+                </div>
+            }
+        </div>
+    }
 }
 
 @code {
