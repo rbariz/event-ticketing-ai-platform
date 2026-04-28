@@ -130,6 +130,11 @@ export interface AgentDecisionLog {
   requiresHumanReview: boolean;
   provider: string;
   createdAtUtc: string;
+  operatorSummary?: string | null;
+  suggestedNextActions?: string[] | null;
+  confidenceScore?: number | null;
+  businessImpact?: string | null;
+  enrichmentProvider?: string | null;
 }
 
 export interface AgentEnrichment {

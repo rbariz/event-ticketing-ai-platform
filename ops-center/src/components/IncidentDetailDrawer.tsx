@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 import { LoadingBlock, ErrorBlock } from "@/components/states";
-import { SeverityBadge, IncidentStatusBadge } from "@/components/badges";
+import { SeverityBadge, IncidentStatusBadge, ProviderBadge, RiskBadge, ActionBadge } from "@/components/badges";
 import { useScanDrawer } from "@/components/ScanDrawerProvider";
 import { ExternalLink } from "lucide-react";
 
@@ -31,6 +31,12 @@ export function IncidentDetailDrawer({ incidentId, open, onOpenChange }: Props) 
   const incQ = useQuery({
     queryKey: ["incident", incidentId],
     queryFn: () => api.incident(incidentId!),
+    enabled: !!incidentId && open,
+  });
+
+  const logsQ = useQuery({
+    queryKey: ["agent", "decision-logs", 50],
+    queryFn: () => api.agentDecisionLogs(50),
     enabled: !!incidentId && open,
   });
 
@@ -70,6 +76,18 @@ export function IncidentDetailDrawer({ incidentId, open, onOpenChange }: Props) 
 
   const inc = incQ.data;
   const isResolved = (inc?.status ?? "").toLowerCase() === "resolved";
+
+  const enrichment = (() => {
+    if (!inc?.scanAttemptId) return null;
+    const logs = logsQ.data ?? [];
+    const matches = logs.filter((l) => l.scanAttemptId === inc.scanAttemptId);
+    if (matches.length === 0) return null;
+    return matches.slice().sort((a, b) => {
+      const ta = a.createdAtUtc ? new Date(a.createdAtUtc).getTime() : 0;
+      const tb = b.createdAtUtc ? new Date(b.createdAtUtc).getTime() : 0;
+      return tb - ta;
+    })[0];
+  })();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -130,6 +148,97 @@ export function IncidentDetailDrawer({ incidentId, open, onOpenChange }: Props) 
                     {t("incidents.resolutionNote")}
                   </div>
                   <div className="whitespace-pre-wrap">{inc.resolutionNote}</div>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-lg border bg-card p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold">{t("incidents.v2Title")}</h3>
+                {enrichment?.enrichmentProvider && (
+                  <ProviderBadge provider={enrichment.enrichmentProvider} />
+                )}
+              </div>
+              {!enrichment && (
+                <p className="text-xs text-muted-foreground">{t("incidents.noEnrichment")}</p>
+              )}
+              {enrichment && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                    <Field
+                      label={t("incidents.riskScore")}
+                      value={
+                        typeof enrichment.riskScore === "number"
+                          ? enrichment.riskScore.toFixed(2)
+                          : "—"
+                      }
+                    />
+                    <Field
+                      label={t("incidents.riskLevel")}
+                      value={<RiskBadge level={enrichment.riskLevel} />}
+                    />
+                    <Field
+                      label={t("agent.confidenceScore")}
+                      value={
+                        typeof enrichment.confidenceScore === "number"
+                          ? enrichment.confidenceScore.toFixed(2)
+                          : "—"
+                      }
+                    />
+                    <Field
+                      label={t("incidents.enrichmentProvider")}
+                      value={enrichment.enrichmentProvider ?? "—"}
+                    />
+                  </div>
+                  {enrichment.operatorSummary && (
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        {t("agent.operatorSummary")}
+                      </div>
+                      <p className="mt-1 text-xs whitespace-pre-wrap">
+                        {enrichment.operatorSummary}
+                      </p>
+                    </div>
+                  )}
+                  {enrichment.businessImpact && (
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        {t("agent.businessImpact")}
+                      </div>
+                      <p className="mt-1 text-xs whitespace-pre-wrap">
+                        {enrichment.businessImpact}
+                      </p>
+                    </div>
+                  )}
+                  {(enrichment.suggestedNextActions ?? []).length > 0 && (
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        {t("agent.suggestedActions")}
+                      </div>
+                      <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs">
+                        {(enrichment.suggestedNextActions ?? []).map((a, i) => (
+                          <li key={i}>{a}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {(enrichment.actions ?? []).length > 0 && (
+                    <div>
+                      <div className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                        {t("agent.actions")}
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {(enrichment.actions ?? []).map((a, i) => (
+                          <ActionBadge key={i} action={a} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {(enrichment.enrichmentProvider ?? "").toLowerCase() === "rulebased" && (
+                    <div className="rounded-md border border-amber-300/50 bg-amber-50 p-2 text-[11px] text-amber-800">
+                      {t("agent.ruleBasedHint")}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

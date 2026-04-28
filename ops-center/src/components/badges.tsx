@@ -28,12 +28,14 @@ export function ProviderBadge({ provider }: { provider?: string | null }) {
     openai: "bg-[var(--provider-openai-bg)] text-[var(--provider-openai)] ring-[var(--provider-openai)]/25",
     rulebased: "bg-[var(--provider-rule-bg)] text-[var(--provider-rule)] ring-[var(--provider-rule)]/20",
     fallback: "bg-[var(--provider-fallback-bg)] text-[var(--provider-fallback)] ring-[var(--provider-fallback)]/30",
+    azureopenai: "bg-cyan-50 text-cyan-700 ring-cyan-600/25",
   };
+  const key = p.replace(/[\s_-]/g, "");
   return (
     <span
       className={cn(
         "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
-        styles[p] ?? "bg-muted text-muted-foreground ring-border",
+        styles[key] ?? styles[p] ?? "bg-muted text-muted-foreground ring-border",
       )}
     >
       {provider}

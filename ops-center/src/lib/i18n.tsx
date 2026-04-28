@@ -121,6 +121,13 @@ const dict = {
     "agent.provider": "Provider",
     "agent.noEnrichment": "No enrichment available",
     "agent.ruleBasedHint": "Rule-based fallback is active. OpenAI may be unavailable or quota-limited.",
+    "incidents.v2Title": "Agent V2 Context",
+    "incidents.enrichmentProvider": "Enrichment Provider",
+    "incidents.noEnrichment": "No agent enrichment available for this incident.",
+    "incidents.riskScore": "Risk score",
+    "incidents.riskLevel": "Risk level",
+    "incidents.enriched": "Enriched",
+    "incidents.fallback": "Fallback",
   },
   fr: {
     "app.title": "TicketGuard Ops",
@@ -238,6 +245,13 @@ const dict = {
     "agent.provider": "Fournisseur",
     "agent.noEnrichment": "Aucun enrichissement disponible",
     "agent.ruleBasedHint": "Le fallback basé sur règles est actif. OpenAI peut être indisponible ou limité par quota.",
+    "incidents.v2Title": "Contexte Agent V2",
+    "incidents.enrichmentProvider": "Fournisseur d'enrichissement",
+    "incidents.noEnrichment": "Aucun enrichissement agent disponible pour cet incident.",
+    "incidents.riskScore": "Score de risque",
+    "incidents.riskLevel": "Niveau de risque",
+    "incidents.enriched": "Enrichi",
+    "incidents.fallback": "Fallback",
   },
 } as const;
 

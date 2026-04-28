@@ -44,6 +44,11 @@ function DashboardPage() {
     queryFn: () => api.incidents({ status: "Open", count: 5 }),
   });
 
+  const decisionLogs50Q = useQuery({
+    queryKey: ["agent", "decision-logs", 50],
+    queryFn: () => api.agentDecisionLogs(50),
+  });
+
   return (
     <div className="space-y-6">
       <div>
@@ -119,7 +124,14 @@ function DashboardPage() {
         {openIncidentsQ.data &&
           ((openIncidentsQ.data ?? []).length ? (
             <ul className="divide-y">
-              {(openIncidentsQ.data ?? []).map((inc) => (
+              {(openIncidentsQ.data ?? []).map((inc) => {
+                const log = (decisionLogs50Q.data ?? []).find(
+                  (l) => l.scanAttemptId === inc.scanAttemptId,
+                );
+                const isFallback =
+                  (log?.enrichmentProvider ?? "").toLowerCase() === "rulebased";
+                const isEnriched = !!log?.operatorSummary;
+                return (
                 <li
                   key={inc.id}
                   onClick={() => openIncident(inc.id)}
@@ -129,11 +141,22 @@ function DashboardPage() {
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium">{inc.title ?? "—"}</div>
                   </div>
+                  {isEnriched && (
+                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                      {t("incidents.enriched")}
+                    </span>
+                  )}
+                  {!isEnriched && isFallback && (
+                    <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
+                      {t("incidents.fallback")}
+                    </span>
+                  )}
                   <span className="text-xs tabular-nums text-muted-foreground">
                     {inc.createdAtUtc ? new Date(inc.createdAtUtc).toLocaleString() : "—"}
                   </span>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           ) : (
             <EmptyBlock label={t("incidents.empty")} />
