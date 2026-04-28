@@ -74,7 +74,12 @@ namespace EventTicketingAiPlatform.Application.UseCases.Agent
                 Reason = decision.Reason,
                 RequiresHumanReview = decision.RequiresHumanReview,
                 Provider = "RuleBasedAgent",
-                CreatedAtUtc = DateTime.UtcNow
+                CreatedAtUtc = DateTime.UtcNow,
+                OperatorSummary = enrichment.OperatorSummary,
+                SuggestedNextActions = string.Join(" | ", enrichment.SuggestedNextActions),
+                ConfidenceScore = enrichment.ConfidenceScore,
+                BusinessImpact = enrichment.BusinessImpact,
+                EnrichmentProvider = enrichment.Provider
             };
 
             await _logRepository.AddAsync(log, cancellationToken);

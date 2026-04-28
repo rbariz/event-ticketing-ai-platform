@@ -38,7 +38,12 @@ namespace EventTicketingAiPlatform.Application.UseCases.Agent
                     x.Reason,
                     x.RequiresHumanReview,
                     x.Provider,
-                    x.CreatedAtUtc))
+                    x.CreatedAtUtc,
+                    x.OperatorSummary,
+                    SplitSuggestedActions(x.SuggestedNextActions),
+                    x.ConfidenceScore,
+                    x.BusinessImpact,
+                    x.EnrichmentProvider))
                 .ToList();
         }
 
@@ -49,6 +54,16 @@ namespace EventTicketingAiPlatform.Application.UseCases.Agent
 
             return actions
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList();
+        }
+
+        private static IReadOnlyList<string> SplitSuggestedActions(string? actions)
+        {
+            if (string.IsNullOrWhiteSpace(actions))
+                return [];
+
+            return actions
+                .Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .ToList();
         }
     }

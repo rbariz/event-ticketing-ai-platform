@@ -29,6 +29,26 @@ namespace EventTicketingAiPlatform.Infrastructure.Persistence.Configurations
             builder.HasIndex(x => x.ScanAttemptId);
             builder.HasIndex(x => x.CreatedAtUtc);
             builder.HasIndex(x => x.Severity);
+
+            builder.Property(x => x.OperatorSummary)
+    .HasColumnName("operator_summary")
+    .HasMaxLength(2000);
+
+            builder.Property(x => x.SuggestedNextActions)
+                .HasColumnName("suggested_next_actions")
+                .HasMaxLength(2000);
+
+            builder.Property(x => x.ConfidenceScore)
+                .HasColumnName("confidence_score")
+                .HasPrecision(5, 2);
+
+            builder.Property(x => x.BusinessImpact)
+                .HasColumnName("business_impact")
+                .HasMaxLength(2000);
+
+            builder.Property(x => x.EnrichmentProvider)
+                .HasColumnName("enrichment_provider")
+                .HasMaxLength(100);
         }
 }
 }

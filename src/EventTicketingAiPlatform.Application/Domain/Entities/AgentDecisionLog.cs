@@ -17,5 +17,11 @@
         public string Provider { get; set; } = "RuleBasedAgent";
 
         public DateTime CreatedAtUtc { get; set; }
+
+        public string? OperatorSummary { get; set; }
+        public string? SuggestedNextActions { get; set; }
+        public decimal? ConfidenceScore { get; set; }
+        public string? BusinessImpact { get; set; }
+        public string? EnrichmentProvider { get; set; }
     }
 }
