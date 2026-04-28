@@ -565,3 +565,18 @@
         margin-top: 0;
         color: #2563eb;
     }
+
+.agent-enrichment {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
+}
+
+    .agent-enrichment p {
+        margin: 7px 0;
+    }
+
+    .agent-enrichment .section-title {
+        margin-top: 0;
+        color: #2563eb;
+    }

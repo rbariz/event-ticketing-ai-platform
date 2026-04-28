@@ -67,6 +67,36 @@
                 Resolve
             </button>
         </div>
+
+        @if (EnrichmentByScanId.TryGetValue(incident.ScanAttemptId, out var enrichment))
+        {
+            <div class="agent-enrichment">
+                <div class="section-title">Agent V2 Context</div>
+
+                <p><strong>Summary:</strong> @(enrichment.OperatorSummary ?? "-")</p>
+                <p><strong>Business impact:</strong> @(enrichment.BusinessImpact ?? "-")</p>
+                <p><strong>Confidence:</strong> @(enrichment.ConfidenceScore?.ToString("0.00") ?? "-")</p>
+                <p><strong>Provider:</strong> @(enrichment.EnrichmentProvider ?? "-")</p>
+
+                @if (enrichment.SuggestedNextActions.Count > 0)
+                {
+                    <p><strong>Suggested actions:</strong></p>
+                    <div class="chips">
+                        @foreach (var action in enrichment.SuggestedNextActions)
+                        {
+                            <span>@action</span>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="agent-enrichment">
+                <div class="section-title">Agent V2 Context</div>
+                <p>No agent enrichment available for this incident.</p>
+            </div>
+        }
     }
 </div>
 
@@ -77,6 +107,8 @@
 
     private string AssignTo = "ops-team";
     private string ResolutionNote = "Reviewed and handled by field operator.";
+
+    private Dictionary<Guid, AgentDecisionLogResponse> EnrichmentByScanId = new();
 
     private List<IncidentResponse> Incidents = new();
 
@@ -93,6 +125,14 @@
             Error = null;
 
             Incidents = await Api.GetIncidentsAsync(status: "Open", count: 50);
+
+            var logs = await Api.GetAgentDecisionLogsAsync(50);
+
+            EnrichmentByScanId = logs
+                .GroupBy(x => x.ScanAttemptId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderByDescending(x => x.CreatedAtUtc).First());
         }
         catch (Exception ex)
         {

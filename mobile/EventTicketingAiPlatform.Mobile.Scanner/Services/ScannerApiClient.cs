@@ -117,8 +117,8 @@ namespace EventTicketingAiPlatform.Mobile.Scanner.Services
         {
             var url = $"/api/incidents?count={count}";
 
-            if (!string.IsNullOrWhiteSpace(status))
-                url += $"&status={Uri.EscapeDataString(status)}";
+            //if (!string.IsNullOrWhiteSpace(status))
+            //    url += $"&status={Uri.EscapeDataString(status)}";
 
             if (!string.IsNullOrWhiteSpace(severity))
                 url += $"&severity={Uri.EscapeDataString(severity)}";
@@ -160,6 +160,15 @@ namespace EventTicketingAiPlatform.Mobile.Scanner.Services
 
             return await response.Content.ReadFromJsonAsync<IncidentResponse>(
                 cancellationToken: cancellationToken);
+        }
+
+        public async Task<List<AgentDecisionLogResponse>> GetAgentDecisionLogsAsync(
+    int count = 50,
+    CancellationToken cancellationToken = default)
+        {
+            return await _http.GetFromJsonAsync<List<AgentDecisionLogResponse>>(
+                $"/api/agent/decision-logs?count={count}",
+                cancellationToken) ?? [];
         }
     }
 

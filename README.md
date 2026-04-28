@@ -279,6 +279,9 @@ OpenAI__ApiKey=your_key
 ### Agent Enrichment
 ![Agent Enrichment](docs/screenshots/agent-enrichment.png)
 
+### Agent V2 Context
+![Agent V2 Context](docs/screenshots/agent-context.png)
+
 
 ---
 
@@ -313,6 +316,7 @@ OpenAI__ApiKey=your_key
 
 ### Mobile Agent Enrichment
 ![Agent Enrichment](docs/screenshots/mobile/mobile-agent-enrichment.png)
+
 
 ---
 
