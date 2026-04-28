@@ -276,6 +276,10 @@ OpenAI__ApiKey=your_key
 ### Incident Detail
 ![Incident Detail](docs/screenshots/incident-detail.png)
 
+### Agent Enrichment
+![Agent Enrichment](docs/screenshots/agent-enrichment.png)
+
+
 ---
 
 ## 📱 Mobile Screenshots
@@ -306,6 +310,9 @@ OpenAI__ApiKey=your_key
 
 ### Mobile Incidents
 ![Mobile Incidents](docs/screenshots/mobile/mobile-incidents.png)
+
+### Mobile Agent Enrichment
+![Agent Enrichment](docs/screenshots/mobile/mobile-agent-enrichment.png)
 
 ---
 
