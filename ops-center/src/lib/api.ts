@@ -132,6 +132,22 @@ export interface AgentDecisionLog {
   createdAtUtc: string;
 }
 
+export interface AgentEnrichment {
+  operatorSummary?: string;
+  suggestedNextActions?: string[];
+  confidenceScore?: number;
+  businessImpact?: string;
+  provider?: "OpenAI" | "RuleBased" | string;
+}
+
+export interface AgentDecisionResponse {
+  severity?: string;
+  actions?: string[];
+  reason?: string;
+  requiresHumanReview?: boolean;
+  enrichment?: AgentEnrichment;
+}
+
 export type IncidentStatus = "Open" | "InProgress" | "Resolved" | string;
 export type IncidentSeverity = "Low" | "Medium" | "High" | "Critical" | string;
 
@@ -186,6 +202,11 @@ export const api = {
     }),
   agentDecisionLogs: (count = 20) =>
     apiFetch<AgentDecisionLog[]>(`/api/agent/decision-logs${buildQuery({ count })}`),
+  analyzeScan: (scanId: string, lang: "en" | "fr") =>
+    apiFetch<AgentDecisionResponse>(
+      `/api/agent/analyze-scan/${encodeURIComponent(scanId)}${buildQuery({ lang })}`,
+      { method: "POST" },
+    ),
   incidents: (filters: IncidentFilters = {}) =>
     apiFetch<Incident[]>(`/api/incidents${buildQuery(filters as Record<string, string | number | undefined>)}`),
   incident: (id: string) =>
